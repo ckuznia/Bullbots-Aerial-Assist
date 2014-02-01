@@ -60,8 +60,8 @@ public class DriveTrain {
         depthPIDController.enable();
         
         if(!testingJag) {
-            LEFT_DUAL_JAG = new DualJaguar(6, 1, p, i, d);
-            RIGHT_DUAL_JAG = new DualJaguar(4, 3, p, i, d);
+            LEFT_DUAL_JAG = new DualJaguar(4, 6, p, i, d);
+            RIGHT_DUAL_JAG = new DualJaguar(7, 3, p, i, d);
             TEST_JAG = null;
         }
         else {
@@ -72,7 +72,7 @@ public class DriveTrain {
     
     public void trackBall() {
         // Tracking the ball horizontally
-        double xOffset = Robot.table.getNumber("xdistance");
+        double xOffset = SmartDashboard.getNumber("xdistance");
         trackingOffset = xOffset;
         
         // Don't need negative values since the motors are facing different directions, so it turns the robot for us.
