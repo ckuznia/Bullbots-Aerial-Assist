@@ -1,6 +1,7 @@
 package org.bullbots.component;
 
 import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.bullbots.PID.PIDHandler;
 import org.bullbots.Robot;
@@ -43,13 +44,13 @@ public class DriveTrain {
     
     private double trackingOffset, depthOffset;
     
-    public DriveTrain(double p, double i, double d) {
+    public DriveTrain() {
         // Setting up PID stuff
         trackingPIDController = new PIDController(P_TRACKING, I_TRACKING, D_TRACKING, PIDHandler.getTrackingSource(), PIDHandler.getTrackingOutput());
         trackingPIDController.setSetpoint(OPTIMAL_TRACKING_OFFSET); // The value that we want it to be
         trackingPIDController.setContinuous(true);
-        trackingPIDController.setOutputRange(-0.5, 0.5); // PLAY WITH VALUES
-        trackingPIDController.setAbsoluteTolerance(0); // PLAY WITH VALUES
+        trackingPIDController.setOutputRange(-0.25, 0.25); // PLAY WITH VALUES
+        //trackingPIDController.setAbsoluteTolerance(0); // PLAY WITH VALUES
         trackingPIDController.enable();
 
         depthPIDController = new PIDController(P_DEPTH, I_DEPTH, D_DEPTH, PIDHandler.getDepthSource(), PIDHandler.getDepthOutput());
@@ -59,29 +60,33 @@ public class DriveTrain {
         depthPIDController.setAbsoluteTolerance(8); // PLAY WITH VALUES
         depthPIDController.enable();
         
+        // Putting the numbers on the dashboard
+        SmartDashboard.putNumber("P_TRACKING", P_TRACKING);
+        SmartDashboard.putNumber("I_TRACKING", I_TRACKING);
+        SmartDashboard.putNumber("D_TRACKING", D_TRACKING);
+        
         if(!testingJag) {
-            LEFT_DUAL_JAG = new DualJaguar(4, 6, p, i, d);
-            RIGHT_DUAL_JAG = new DualJaguar(7, 3, p, i, d);
+            LEFT_DUAL_JAG = new DualJaguar(4, 6, P, I, D);
+            RIGHT_DUAL_JAG = new DualJaguar(7, 3, P, I, D);
             TEST_JAG = null;
         }
         else {
             LEFT_DUAL_JAG = RIGHT_DUAL_JAG = null;
-            TEST_JAG = new Jaguar(000, p, i, d);
+            TEST_JAG = new Jaguar(000, P, I, D);
         }
     }
     
     public void trackBall() {
         // Tracking the ball horizontally
-        double xOffset = SmartDashboard.getNumber("xdistance");
-        trackingOffset = xOffset;
-        
+        trackingOffset = NetworkTable.getTable("balltable").getNumber("xdistance");
         // Don't need negative values since the motors are facing different directions, so it turns the robot for us.
         driveUsingVoltage(trackingOffset, trackingOffset);
+        System.out.println(trackingOffset);
         
         
         
         // Tracking ball vertically
-        /*double zOffset = table.getNumber("radius"); // THIS IS A RATIO : NEED TO CALCULATE
+        /*double zOffset = Robot.table.getNumber("radius"); // THIS IS A RATIO : NEED TO CALCULATE
         driveTrain.setDepthOffset(zOffset);
 
         driveTrain.driveUsingVoltage(depthOffset, -depthOffset);*/

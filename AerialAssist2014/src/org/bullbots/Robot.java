@@ -25,7 +25,7 @@ public class Robot extends IterativeRobot {
     
     private DriveTrain driveTrain;
     private JoystickController joystick, joystick2;
-    public static NetworkTable table = NetworkTable.getTable("balltable");
+    //public NetworkTable table = NetworkTable.getTable("balltable");
     
     /**
      * This function is run when the robot is first started up and should be
@@ -33,7 +33,9 @@ public class Robot extends IterativeRobot {
      */
     public void robotInit() {
         try {
-            
+            driveTrain = new DriveTrain();
+            joystick = new JoystickController(1);
+            joystick2 = new JoystickController(2);
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -52,6 +54,6 @@ public class Robot extends IterativeRobot {
     public void teleopPeriodic() {
         int trackButton = 1;
         if(joystick.isButtonDown(trackButton) || joystick2.isButtonDown(trackButton)) driveTrain.trackBall();
-        else driveTrain.driveUsingVoltage(joystick.getYAxis(), joystick2.getYAxis());
+        else driveTrain.driveUsingVoltage(-joystick.getYAxis(), joystick2.getYAxis());
     }
 }
