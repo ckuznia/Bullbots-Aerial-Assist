@@ -8,7 +8,9 @@
 package org.bullbots;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import org.bullbots.component.DriveTrain;
 import org.bullbots.controller.JoystickController;
@@ -24,16 +26,21 @@ import org.bullbots.util.UserDebug;
 public class Robot extends IterativeRobot {
     
     private DriveTrain driveTrain;
-    private JoystickController joystick, joystick2;
-    //public NetworkTable table = NetworkTable.getTable("balltable");
+    public static JoystickController joystick, joystick2;
+    private NetworkTable table;
+    public static TableListener tableListener;
     
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
      */
     public void robotInit() {
+        System.out.println("\n>> Robot Initialization Has Begun...");
         try {
-            driveTrain = new DriveTrain();
+            table =  NetworkTable.getTable("balltable");
+            tableListener = new TableListener();
+            table.addTableListener(tableListener);
+            driveTrain = new DriveTrain(table);
             joystick = new JoystickController(1);
             joystick2 = new JoystickController(2);
         }
@@ -41,6 +48,7 @@ public class Robot extends IterativeRobot {
             e.printStackTrace();
             UserDebug.print("Error initializing robot.");
         }
+        System.out.println("\n>> Robot Initialization Has Finished...");
     }
 
     /**
@@ -54,6 +62,19 @@ public class Robot extends IterativeRobot {
     public void teleopPeriodic() {
         int trackButton = 1;
         if(joystick.isButtonDown(trackButton) || joystick2.isButtonDown(trackButton)) driveTrain.trackBall();
-        else driveTrain.driveUsingVoltage(-joystick.getYAxis(), joystick2.getYAxis());
+        else {
+            // Joystick 1 updates
+            PIDController joy1PIDController = driveTrain.getJoystick1PIDController();
+            joy1PIDController.setSetpoint(joystick.getYAxis());
+            joy1PIDController.setPID(SmartDashboard.getNumber("P_JOY1"), SmartDashboard.getNumber("I_JOY1"), SmartDashboard.getNumber("D_JOY1"));
+            
+            // Joystick 2 updates
+            PIDController joy2PIDController = driveTrain.getJoystick2PIDController();
+            joy2PIDController.setSetpoint(joystick2.getYAxis());
+            joy2PIDController.setPID(SmartDashboard.getNumber("P_JOY2"), SmartDashboard.getNumber("I_JOY2"), SmartDashboard.getNumber("D_JOY2"));
+            
+            driveTrain.driveUsingSpeed(joy1PIDController.get(), joy2PIDController.get());
+            //driveTrain.driveUsingVoltage(-joystick.getYAxis(), joystick2.getYAxis());
+        }
     }
 }

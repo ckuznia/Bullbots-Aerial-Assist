@@ -35,4 +35,12 @@ public class DualJaguar {
 	JAG_1.driveUsingPosition(rotation);
 	JAG_2.driveUsingPosition(rotation);
     }
+    
+    public double getSpeed() {
+        JAG_1.setControlMode(CANJaguar.ControlMode.kSpeed);
+	JAG_2.setControlMode(CANJaguar.ControlMode.kSpeed);
+        
+        // Returns the Jag with the lowest speed reading
+        return Math.min(JAG_1.getX(), JAG_2.getX());
+    }
 }

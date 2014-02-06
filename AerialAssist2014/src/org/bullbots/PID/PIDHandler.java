@@ -20,6 +20,28 @@ public class PIDHandler {
     //===================================================================
     //===================================================================
     
+    // Source (Input) for joystick1 driving
+    public class Joystick1PIDSource implements PIDSource {
+        
+        public double pidGet() {
+            return driveTrain.getLeftDualJag().getSpeed();
+        }
+    }
+    
+    //===================================================================
+    
+    // Source(Input) for joystick2 driving
+    public class Joystick2PIDSource implements PIDSource {
+        
+        public double pidGet() {
+            return driveTrain.getRightDualJag().getSpeed();
+        }
+    }
+    
+    //===================================================================
+    //===================================================================
+    //===================================================================
+
     
     // Source (Input) for tracking PID
     public class TrackingPIDSource implements PIDSource {
@@ -64,6 +86,13 @@ public class PIDHandler {
     //===================================================================
     //===================================================================
     
+    public PIDSource getJoystick1PIDSource() {
+        return new Joystick1PIDSource();
+    }
+    
+    public PIDSource getJoystick2PIDSource() {
+        return new Joystick2PIDSource();
+    }
     
     public PIDSource getTrackingSource() {
         return new TrackingPIDSource();
