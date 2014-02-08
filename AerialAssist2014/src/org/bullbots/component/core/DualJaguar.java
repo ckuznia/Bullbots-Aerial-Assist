@@ -1,46 +1,52 @@
 package org.bullbots.component.core;
 
 import edu.wpi.first.wpilibj.CANJaguar;
+import org.bullbots.util.UserDebug;
 
 /**
  * @author Clay Kuznia
  */
 public class DualJaguar {
     
-    private final Jaguar JAG_1, JAG_2;
+    private final Jaguar MASTER_JAG, SLAVE_JAG;
     
-    public DualJaguar(int ID1, int ID2, double P, double I, double D) {
-	JAG_1 = new Jaguar(ID1, P, I, D);
-	JAG_2 = new Jaguar(ID2, P, I, D);
+    public DualJaguar(int MASTER_ID, int SLAVE_ID, double P, double I, double D) {
+	MASTER_JAG = new Jaguar(MASTER_ID, P, I, D);
+	SLAVE_JAG = new Jaguar(SLAVE_ID);
     }
     
-    public void driveUsingSpeed(double forwardSpeed) {
-	// Setting modes that way the getX() returns the correct value
-	JAG_1.setControlMode(CANJaguar.ControlMode.kSpeed);
-	JAG_2.setControlMode(CANJaguar.ControlMode.kSpeed);
-	
-	// If the speeds are not up to the set speed AND equal, them keep setting them to that speed
-	if(JAG_1.getX() != forwardSpeed || JAG_2.getX() != forwardSpeed) {
-	    JAG_1.driveUsingSpeed(forwardSpeed);
-	    JAG_2.driveUsingSpeed(forwardSpeed);
+    public void driveUsingVoltage(double votage) {
+	MASTER_JAG.driveUsingVoltage(votage);
+	SLAVE_JAG.driveUsingVoltage(votage);
+    }
+    
+    public void driveUsingSpeed(double RPM) {
+	MASTER_JAG.setControlMode(CANJaguar.ControlMode.kSpeed);
+        
+        UserDebug.print("\nvalue from Master getSpeed(): " + MASTER_JAG.getSpeed());
+        
+        // Updating the speed of the master jag
+        if(MASTER_JAG.getSpeed() != RPM) {
+            MASTER_JAG.setX(RPM);
+            UserDebug.print("Master jag was updated.");
+        }
+        
+	// If the slave current does not match the master, then update the slave's current to the master's
+	if(SLAVE_JAG.getOutputCurrent() != MASTER_JAG.getOutputCurrent()) {
+	    SLAVE_JAG.setControlMode(CANJaguar.ControlMode.kCurrent);
+            SLAVE_JAG.setX(MASTER_JAG.getOutputCurrent());
+            
+            UserDebug.print("Slave jag was updated.");
 	}
     }
     
-    public void driveUsingVoltage(double forwardVoltage) {
-	JAG_1.driveUsingVoltage(forwardVoltage);
-	JAG_2.driveUsingVoltage(forwardVoltage);
-    }
-    
-    public void driveUsingPosition(double rotation) {
-	JAG_1.driveUsingPosition(rotation);
-	JAG_2.driveUsingPosition(rotation);
+    public void driveUsingPosition(double rotations) {
+	MASTER_JAG.driveUsingPosition(rotations);
+	SLAVE_JAG.driveUsingPosition(rotations);
     }
     
     public double getSpeed() {
-        JAG_1.setControlMode(CANJaguar.ControlMode.kSpeed);
-	JAG_2.setControlMode(CANJaguar.ControlMode.kSpeed);
-        
-        // Returns the Jag with the lowest speed reading
-        return Math.min(JAG_1.getX(), JAG_2.getX());
+        MASTER_JAG.setControlMode(CANJaguar.ControlMode.kSpeed);
+        return MASTER_JAG.getSpeed();
     }
 }

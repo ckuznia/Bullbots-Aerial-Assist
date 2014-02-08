@@ -24,7 +24,16 @@ public class PIDHandler {
     public class Joystick1PIDSource implements PIDSource {
         
         public double pidGet() {
+            System.out.println("pidGet(): " + driveTrain.getRightDualJag().getSpeed());
             return driveTrain.getLeftDualJag().getSpeed();
+        }
+    }
+    
+    // Output for joystick1 driving
+    public class Joystick1PIDOutput implements PIDOutput {
+        
+        public void pidWrite(double value) {
+            // No action taken
         }
     }
     
@@ -35,6 +44,14 @@ public class PIDHandler {
         
         public double pidGet() {
             return driveTrain.getRightDualJag().getSpeed();
+        }
+    }
+    
+    // Output for joystick2 driving
+    public class Joystick2PIDOutput implements PIDOutput {
+        
+        public void pidWrite(double value) {
+            // No action taken
         }
     }
     
@@ -90,8 +107,16 @@ public class PIDHandler {
         return new Joystick1PIDSource();
     }
     
+    public PIDOutput getJoystick1PIDOutput() {
+        return new Joystick1PIDOutput();
+    }
+    
     public PIDSource getJoystick2PIDSource() {
         return new Joystick2PIDSource();
+    }
+    
+    public PIDOutput getJoystick2PIDOutput() {
+        return new Joystick2PIDOutput();
     }
     
     public PIDSource getTrackingSource() {

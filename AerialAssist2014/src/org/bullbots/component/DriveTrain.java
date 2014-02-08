@@ -1,6 +1,7 @@
 package org.bullbots.component;
 
 import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.bullbots.PID.PIDHandler;
@@ -13,26 +14,26 @@ import org.bullbots.component.core.DualJaguar;
 public class DriveTrain {
     /* Helpful PID Stuff:
         Setpoint -> Value at which you want it to be
-        P -> Speedat which to move to the setpoint
+        P -> Speed at which to move to the setpoint
         I -> Not always used, for fine tuning
         D -> The amount of damping when arriving at the setpoint
     */
     
     // Normal Driving PIDs
-    private final double P_JOY1 = 0.0;
-    private final double I_JOY1 = 0.0;
-    private final double D_JOY1 = 0.0;
+    private final double P_JOY1 = 1.0;
+    private final double I_JOY1 = 0.2;
+    private final double D_JOY1 = 0.5;
     
-    private final double P_JOY2 = 0.0;
-    private final double I_JOY2 = 0.0;
-    private final double D_JOY2 = 0.0;
+    private final double P_JOY2 = 1.0;
+    private final double I_JOY2 = 0.2;
+    private final double D_JOY2 = 0.5;
     
     private final double JAG_TOLERANCE = 0.01;
     
     // Tracking PID (X Axis)
-    private final double P_TRACKING = 0.0;
+    private final double P_TRACKING = 0.5;
     private final double I_TRACKING = 0.0;
-    private final double D_TRACKING = 0.0;
+    private final double D_TRACKING = 0.5;
     private final double OPTIMAL_TRACKING_OFFSET = 0.0;
     
     // Depth PID (Z Axis)
@@ -61,20 +62,24 @@ public class DriveTrain {
         PIDHandler = new PIDHandler(this);
         
         // Joystick1 PID setup
-        joystick1PIDController = new PIDController(P_JOY1, I_JOY1, D_JOY1, PIDHandler.getJoystick1PIDSource(), null);
+        joystick1PIDController = new PIDController(P_JOY1, I_JOY1, D_JOY1, PIDHandler.getJoystick1PIDSource(), PIDHandler.getJoystick1PIDOutput());
+        joystick1PIDController.setSetpoint(0.0);
         joystick1PIDController.setContinuous(false);
         joystick1PIDController.setInputRange(-1, 1);
         joystick1PIDController.setOutputRange(-1, 1);
         joystick1PIDController.setAbsoluteTolerance(JAG_TOLERANCE);
         joystick1PIDController.enable();
-        
+        LiveWindow.addActuator("PIDS", "Joystick 1", joystick1PIDController);
+         
         // Joystick2 PID setup
-        joystick2PIDController = new PIDController(P_JOY2, I_JOY2, D_JOY2, PIDHandler.getJoystick2PIDSource(), null);
+        joystick2PIDController = new PIDController(P_JOY2, I_JOY2, D_JOY2, PIDHandler.getJoystick2PIDSource(), PIDHandler.getJoystick2PIDOutput());
+        joystick2PIDController.setSetpoint(0.0);
         joystick2PIDController.setContinuous(false);
         joystick2PIDController.setInputRange(-1, 1);
         joystick2PIDController.setOutputRange(-1, 1);
         joystick2PIDController.setAbsoluteTolerance(JAG_TOLERANCE);
         joystick2PIDController.enable();
+        LiveWindow.addActuator("PIDS", "Joystick 2", joystick2PIDController);
         
         // Tracking PID setup
         trackingPIDController = new PIDController(P_TRACKING, I_TRACKING, D_TRACKING, PIDHandler.getTrackingSource(), PIDHandler.getTrackingOutput());
@@ -89,10 +94,11 @@ public class DriveTrain {
         depthPIDController = new PIDController(P_DEPTH, I_DEPTH, D_DEPTH, PIDHandler.getDepthSource(), PIDHandler.getDepthOutput());
         depthPIDController.setSetpoint(OPTIMAL_DEPTH_OFFSET);
         depthPIDController.setContinuous(false);
-        depthPIDController.setInputRange(000, 000);     // NEED TO CONFIGURE
+        depthPIDController.setInputRange(0, 0);     // NEED TO CONFIGURE
         depthPIDController.setOutputRange(-1, 1);
         depthPIDController.setAbsoluteTolerance(3);     // NEED TO CONFIGURE
         depthPIDController.enable();
+        //LiveWindow.addActuator("PIDS", "Depth", depthPIDController);
         
         // Putting the numbers on the dashboard
         SmartDashboard.putNumber("P_JOY1", P_JOY1);
@@ -149,14 +155,13 @@ public class DriveTrain {
     }
     
     public void driveUsingSpeed(double leftRPM, double rightRPM) {
-        // MAY NEED A SPEED FACTOR (100)
-        LEFT_DUAL_JAG.driveUsingVoltage(leftRPM);
-        RIGHT_DUAL_JAG.driveUsingVoltage(rightRPM);
+        LEFT_DUAL_JAG.driveUsingSpeed(leftRPM);
+        RIGHT_DUAL_JAG.driveUsingSpeed(rightRPM);
     }
     
     public void driveUsingPosition(double leftRotations, double rightRotations) {
-        LEFT_DUAL_JAG.driveUsingVoltage(leftRotations);
-        RIGHT_DUAL_JAG.driveUsingVoltage(rightRotations);
+        LEFT_DUAL_JAG.driveUsingPosition(leftRotations);
+        RIGHT_DUAL_JAG.driveUsingPosition(rightRotations);
     }
     
     public double getTrackingOffset() {

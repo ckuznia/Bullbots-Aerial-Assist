@@ -14,21 +14,39 @@ public class Jaguar {
     
     private final int ID;
     
-    private final double RAMP_RATE = 0.0; // Setting this to 0.0 disables rate limiting
     private final double LOWEST_ACCEPTABLE_VOLTAGE = 10.0;
     
     private int voltCheckCount = 0;
     
+    private final boolean hasEncoder;
+        
     public Jaguar(int ID, double p, double i, double d) {
 	this.ID = ID;
-	
-	try{
-	    // Initializing jaguar
+        hasEncoder = true;
+        
+        try {
+            // Initializing jaguar
 	    jag = new CANJaguar(ID);
             configureJaguar(p, i, d);
             checkIncomingVoltage();
+        }
+        catch(CANTimeoutException e) {
+	    e.printStackTrace();
+	    UserDebug.print("Error initializing Jaguar #" + ID);
 	}
-	catch(CANTimeoutException e) {
+    }
+    
+    public Jaguar(int ID) {
+        this.ID = ID;
+        hasEncoder = false;
+        
+        try {
+            // Initializing jaguar
+	    jag = new CANJaguar(ID);
+            configureJaguar();
+            checkIncomingVoltage();
+        }
+        catch(CANTimeoutException e) {
 	    e.printStackTrace();
 	    UserDebug.print("Error initializing Jaguar #" + ID);
 	}
@@ -76,7 +94,8 @@ public class Jaguar {
 	    
 	    if(jag.getControlMode() != mode) {
 		jag.changeControlMode(mode);
-		configureJaguar(jag.getP(), jag.getI(), jag.getD());
+		if(hasEncoder) configureJaguar(jag.getP(), jag.getI(), jag.getD());
+                else configureJaguar();
 	    }
 	}
         catch(CANTimeoutException e){
@@ -87,13 +106,14 @@ public class Jaguar {
     
     private void configureJaguar(double p, double i, double d) {
 	try {
-	    jag.setPID(p, i, d); // Might not use for initial testing
-	    jag.setSpeedReference(CANJaguar.SpeedReference.kQuadEncoder);
-	    jag.setPositionReference(CANJaguar.PositionReference.kQuadEncoder);
-	    jag.setVoltageRampRate(RAMP_RATE);
-	    jag.configEncoderCodesPerRev(360);
-	    jag.configMaxOutputVoltage(12);
-	    jag.enableControl();
+            // Initialize PID and encoder stuff
+            jag.setSpeedReference(CANJaguar.SpeedReference.kQuadEncoder);
+            jag.setPositionReference(CANJaguar.PositionReference.kQuadEncoder);
+            jag.configEncoderCodesPerRev(360);
+            jag.setPID(p, i, d);
+            
+            // Configuring the rest of the settings
+            configureJaguar();
 	}
 	catch(CANTimeoutException e) {
 	    e.printStackTrace();
@@ -101,9 +121,21 @@ public class Jaguar {
 	}
     }
     
+    private void configureJaguar() {
+        try {
+            jag.setVoltageRampRate(0.0);
+            jag.configMaxOutputVoltage(12);
+            jag.enableControl();
+        }
+        catch(CANTimeoutException e) {
+	    e.printStackTrace();
+	    UserDebug.print("Error configuring Jaguar #" + ID);
+	}
+    }
+    
     private void checkIncomingVoltage() {
 	try {
-	    // Only check for voltage every 50 times
+	    // Only check for voltage every 50 iterations
 	    if(voltCheckCount >= 50) {
 		voltCheckCount = 0;
 		double incomingVoltage = jag.getBusVoltage();
@@ -141,4 +173,26 @@ public class Jaguar {
 	    UserDebug.print("Error using setX() on Jaguar #" + ID);
 	}
     }
+     
+     public double getSpeed() {
+        try {
+	    return jag.getSpeed();
+	}
+	catch(CANTimeoutException e) {
+	    e.printStackTrace();
+	    UserDebug.print("Error using getSpeed() on Jaguar #" + ID);
+	}
+        return 0.0;
+     }
+     
+     public double getOutputCurrent() {
+         try {
+             return jag.getOutputCurrent();
+         }
+         catch(CANTimeoutException e) {
+	    e.printStackTrace();
+	    UserDebug.print("Error using getCurrent() on Jaguar #" + ID);
+         }
+         return 0.0;
+     }
 }
