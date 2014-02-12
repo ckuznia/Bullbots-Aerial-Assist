@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.CANJaguar;
 import org.bullbots.util.UserDebug;
 
 /**
- * @author Clay Kuznia
+ * @author Clay Kuznia & Noah Peterson
  */
 public class DualJaguar {
     
