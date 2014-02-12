@@ -23,17 +23,20 @@ public class DualJaguar {
     public void driveUsingSpeed(double RPM) {
 	MASTER_JAG.setControlMode(CANJaguar.ControlMode.kSpeed);
         
-        UserDebug.print("\nvalue from Master getSpeed(): " + MASTER_JAG.getSpeed());
+        UserDebug.print("\nvalue from Master getX(): " + MASTER_JAG.getX());
         
         // Updating the speed of the master jag
-        if(MASTER_JAG.getSpeed() != RPM) {
+        if(MASTER_JAG.getX() != RPM) {
             MASTER_JAG.setX(RPM);
             UserDebug.print("Master jag was updated.");
         }
         
+        // Setting them in current mode in order to get the current
+        MASTER_JAG.setControlMode(CANJaguar.ControlMode.kCurrent);
+        SLAVE_JAG.setControlMode(CANJaguar.ControlMode.kCurrent);
+        
 	// If the slave current does not match the master, then update the slave's current to the master's
 	if(SLAVE_JAG.getOutputCurrent() != MASTER_JAG.getOutputCurrent()) {
-	    SLAVE_JAG.setControlMode(CANJaguar.ControlMode.kCurrent);
             SLAVE_JAG.setX(MASTER_JAG.getOutputCurrent());
             
             UserDebug.print("Slave jag was updated.");

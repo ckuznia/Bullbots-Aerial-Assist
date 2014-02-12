@@ -47,7 +47,7 @@ public class Robot extends IterativeRobot {
             e.printStackTrace();
             UserDebug.print("Error initializing robot.");
         }
-        System.out.println("\n\n>> Robot Initialization Has FINISHED...\n\n");
+        System.out.println(">> Robot Initialization Has FINISHED...\n\n");
     }
 
     /**
@@ -94,9 +94,9 @@ public class Robot extends IterativeRobot {
         }
         catch(Exception e) {
             e.printStackTrace();
-            UserDebug.print("Error TEST initializing robot.");
+            UserDebug.print("Error in testInit().");
         }
-        System.out.println("\n\n>> Robot Initialization Has FINISHED...\n\n");
+        System.out.println(">> Robot TEST Initialization Has FINISHED...\n\n");
     }
     
     public void testPeriodic() {

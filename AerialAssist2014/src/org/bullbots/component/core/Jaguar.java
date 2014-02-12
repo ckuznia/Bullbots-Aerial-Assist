@@ -1,4 +1,4 @@
- package org.bullbots.component.core;
+package org.bullbots.component.core;
 
 import edu.wpi.first.wpilibj.CANJaguar;
 import edu.wpi.first.wpilibj.can.CANTimeoutException;

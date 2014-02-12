@@ -20,26 +20,26 @@ public class DriveTrain {
     */
     
     // Normal Driving PIDs
-    private final double P_JOY1 = 1.0;
-    private final double I_JOY1 = 0.2;
-    private final double D_JOY1 = 0.5;
+    private final double P_JOY1 = 0.25;
+    private final double I_JOY1 = 0.25;
+    private final double D_JOY1 = 0.25;
     
-    private final double P_JOY2 = 1.0;
-    private final double I_JOY2 = 0.2;
-    private final double D_JOY2 = 0.5;
+    private final double P_JOY2 = 0.25;
+    private final double I_JOY2 = 0.25;
+    private final double D_JOY2 = 0.25;
     
     private final double JAG_TOLERANCE = 0.01;
     
     // Tracking PID (X Axis)
-    private final double P_TRACKING = 0.5;
-    private final double I_TRACKING = 0.0;
-    private final double D_TRACKING = 0.5;
+    private final double P_TRACKING = 0.25;
+    private final double I_TRACKING = 0.25;
+    private final double D_TRACKING = 0.25;
     private final double OPTIMAL_TRACKING_OFFSET = 0.0;
     
     // Depth PID (Z Axis)
-    private final double P_DEPTH = 0.0;
-    private final double I_DEPTH = 0.0;
-    private final double D_DEPTH = 0.0;
+    private final double P_DEPTH = 0.25;
+    private final double I_DEPTH = 0.25;
+    private final double D_DEPTH = 0.25;
     private final double OPTIMAL_DEPTH_OFFSET = 0.0;
     
     // PID Controller Objects
