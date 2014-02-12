@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj.PIDSource;
 import org.bullbots.component.DriveTrain;
 
 /**
- * @author Clay Kuznia
+ * @author Clay Kuznia & Noah Peterson
  */
 public class PIDHandler {
     

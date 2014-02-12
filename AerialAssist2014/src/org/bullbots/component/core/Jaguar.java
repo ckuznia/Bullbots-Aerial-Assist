@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.can.CANTimeoutException;
 import org.bullbots.util.UserDebug;
 
 /**
- * @author Clay Kuznia
+ * @author Clay Kuznia & Noah Peterson
  */
 public class Jaguar {
     

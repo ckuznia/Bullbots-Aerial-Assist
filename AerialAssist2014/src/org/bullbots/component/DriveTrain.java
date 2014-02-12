@@ -9,7 +9,7 @@ import org.bullbots.TableListener;
 import org.bullbots.component.core.DualJaguar;
 
 /**
- * @author Clay Kuznia
+ * @author Clay  & Noah Peterson
  */
 public class DriveTrain {
     /* Helpful PID Stuff:

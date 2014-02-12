@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
 
 /**
- * @author Clay Kuznia
+ * @author Clay Kuznia & Noah Peterson
  */
 public class TableListener implements ITableListener {
 

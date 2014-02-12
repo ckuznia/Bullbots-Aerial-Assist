@@ -1,7 +1,7 @@
 package org.bullbots.util;
 
 /**
- * @author Clay Kuznia
+ * @author Clay Kuznia & Noah Peterson
  */
 public class UserDebug {
     

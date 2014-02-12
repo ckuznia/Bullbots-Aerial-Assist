@@ -3,7 +3,7 @@ package org.bullbots.controller;
 import edu.wpi.first.wpilibj.Joystick;
 
 /**
- * @author Clay Kuznia
+ * @author Clay Kuznia & Noah Peterson
  */
 public class JoystickController {
     
