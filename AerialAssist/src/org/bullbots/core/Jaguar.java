@@ -2,7 +2,6 @@ package org.bullbots.core;
 
 import edu.wpi.first.wpilibj.CANJaguar;
 import edu.wpi.first.wpilibj.can.CANTimeoutException;
-import org.usfirst.frc1891.AerialAssist.Robot;
 
 /**
  * @author Clay Kuznia
@@ -33,41 +32,41 @@ public class Jaguar extends CANJaguar {
         checkIncomingVoltage();
     }
     
-    public void driveUsingVoltage(double value) {
+    private void setValue(double value) {
+        try {
+            this.setX(value);
+        } catch (CANTimeoutException ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    public void driveUsingVoltage(double voltage) {
 	// Voltage range is from -1.0 to 1.0
         setControlMode(CANJaguar.ControlMode.kPercentVbus);
-        try {
-            this.setX(value);
-        } catch (CANTimeoutException ex) {
-            ex.printStackTrace();
-        }
+        setValue(voltage);
     }
     
-    public void driveUsingSpeed(double value) {
+    public void driveUsingSpeed(double RPM) {
+        // Speed unit is in RPMs
         setControlMode(CANJaguar.ControlMode.kSpeed);
-        try {
-            System.out.println("mode: "+getControlMode()+ "Ecode:"+getControlMode());
-            System.out.println("P:"+getP()+" I:"+getI()+" D:"+getD());
-            this.setX(value);
-        } catch (CANTimeoutException ex) {
-            ex.printStackTrace();
-        }
+        setValue(RPM);
     }
     
-    public void driveUsingPosition(double value) {
+    public void driveUsingPosition(double rotations) {
 	// Position unit is in rotations
         setControlMode(CANJaguar.ControlMode.kPosition);
-        try {
-            this.setX(value);
-        } catch (CANTimeoutException ex) {
-            ex.printStackTrace();
-        }
+        setValue(rotations);
+    }
+    
+    public void driveUsingCurrent(double current) {
+        setControlMode(CANJaguar.ControlMode.kCurrent);
+        setValue(current);
     }
     
     public void setControlMode(CANJaguar.ControlMode mode) {
 	try {
 	    checkIncomingVoltage();
-
+            
 	    if(!this.getControlMode().equals(mode)) {
 		this.changeControlMode(mode);
 		if(hasEncoder) configureJaguar(this.getP(), this.getI(), this.getD());
@@ -115,13 +114,13 @@ public class Jaguar extends CANJaguar {
 	    if(voltCheckCount >= 50) {
 		voltCheckCount = 0;
 		double incomingVoltage = this.getBusVoltage();
-
+                
 		// If battery voltage is too low
 		if(incomingVoltage <= LOWEST_ACCEPTABLE_VOLTAGE) {
 		    System.out.print("WARNING! Incoming voltage is at " + incomingVoltage + "v on Jaguar #" + ID);
 		}
 	    }
-	    voltCheckCount++;
+            else voltCheckCount++;
 	}
 	catch(CANTimeoutException e) {
 	    e.printStackTrace();

@@ -30,7 +30,7 @@ public class  DriveUsingJoysticks extends Command {
     // Called repeatedly when this Command is scheduled to run
     protected void execute() {
         //Robot.driveTrain.driveUsingVoltage(Robot.oi.joystickController1.getYAxis(), -Robot.oi.joystickController2.getYAxis());
-        Robot.driveTrain.driveUsingSpeed(Robot.oi.joystickController1.getYAxis(), -Robot.oi.joystickController2.getYAxis());
+        Robot.driveTrain.driveUsingSpeed(Robot.oi.joystickController1.getYAxis() * Robot.MAX_RPM, -Robot.oi.joystickController2.getYAxis() * Robot.MAX_RPM);
     }
     
     // Make this return true when this Command no longer needs to run execute()
