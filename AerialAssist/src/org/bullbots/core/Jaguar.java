@@ -2,97 +2,75 @@ package org.bullbots.core;
 
 import edu.wpi.first.wpilibj.CANJaguar;
 import edu.wpi.first.wpilibj.can.CANTimeoutException;
+import org.usfirst.frc1891.AerialAssist.Robot;
 
 /**
  * @author Clay Kuznia
  */
-public class Jaguar {
-    
-    private CANJaguar jag;
-    
+public class Jaguar extends CANJaguar {
+        
     private final int ID;
-    
     private final double LOWEST_ACCEPTABLE_VOLTAGE = 10.0;
-    
     private int voltCheckCount = 0;
-    
     private final boolean hasEncoder;
         
-    public Jaguar(int ID, double p, double i, double d) {
-	this.ID = ID;
-        hasEncoder = true;
+    public Jaguar(int ID, double p, double i, double d) throws CANTimeoutException {
+	super(ID);
         
-        try {
-            // Initializing jaguar
-	    jag = new CANJaguar(ID);
-            configureJaguar(p, i, d);
-            checkIncomingVoltage();
-        }
-        catch(CANTimeoutException e) {
-	    e.printStackTrace();
-	    System.out.print("Error initializing Jaguar #" + ID);
-	}
+        this.ID = ID;
+        hasEncoder = true;
+        // Initializing jaguar
+        configureJaguar(p, i, d);
+        checkIncomingVoltage();
     }
     
-    public Jaguar(int ID) {
+    public Jaguar(int ID) throws CANTimeoutException {
+        super(ID);
         this.ID = ID;
         hasEncoder = false;
-        
+        // Initializing jaguar
+        configureJaguar();
+        checkIncomingVoltage();
+    }
+    
+    public void driveUsingVoltage(double value) {
+	// Voltage range is from -1.0 to 1.0
+        setControlMode(CANJaguar.ControlMode.kPercentVbus);
         try {
-            // Initializing jaguar
-	    jag = new CANJaguar(ID);
-            configureJaguar();
-            checkIncomingVoltage();
+            this.setX(value);
+        } catch (CANTimeoutException ex) {
+            ex.printStackTrace();
         }
-        catch(CANTimeoutException e) {
-	    e.printStackTrace();
-	    System.out.print("Error initializing Jaguar #" + ID);
-	}
     }
     
-    public void driveUsingVoltage(double voltage) {
-	// Voltage unit is from -1.0 to 1.0
-	try {
-	    setControlMode(CANJaguar.ControlMode.kPercentVbus);
-	    jag.setX(voltage);
-	}
-	catch(CANTimeoutException e) {
-	    e.printStackTrace();
-	    System.out.print("Error driving using voltage on Jaguar #" + ID);
-	}
+    public void driveUsingSpeed(double value) {
+        setControlMode(CANJaguar.ControlMode.kSpeed);
+        try {
+            System.out.println("mode: "+getControlMode()+ "Ecode:"+getControlMode());
+            System.out.println("P:"+getP()+" I:"+getI()+" D:"+getD());
+            this.setX(value);
+        } catch (CANTimeoutException ex) {
+            ex.printStackTrace();
+        }
     }
     
-    public void driveUsingSpeed(double rpm) {
-	// Speed unit is in rotations-per-minute
-	try {
-	    setControlMode(CANJaguar.ControlMode.kSpeed);
-	    jag.setX(rpm);
-	}
-	catch(CANTimeoutException e) {
-	    e.printStackTrace();
-	    System.out.print("Error driving using speed on Jaguar #" + ID);
-	}
-    }
-    
-    public void driveUsingPosition(double rotations) {
+    public void driveUsingPosition(double value) {
 	// Position unit is in rotations
-	try {
-	    setControlMode(CANJaguar.ControlMode.kPosition);
-	    jag.setX(rotations);
-	}
-	catch(CANTimeoutException e) {
-	    e.printStackTrace();
-	    System.out.print("Error driving using position on Jaguar #" + ID);
-	}
+        setControlMode(CANJaguar.ControlMode.kPosition);
+        try {
+            this.setX(value);
+        } catch (CANTimeoutException ex) {
+            ex.printStackTrace();
+        }
     }
     
     public void setControlMode(CANJaguar.ControlMode mode) {
 	try {
 	    checkIncomingVoltage();
 
-	    if(jag.getControlMode() != mode) {
-		jag.changeControlMode(mode);
-		if(hasEncoder) configureJaguar(jag.getP(), jag.getI(), jag.getD());
+	    if(!this.getControlMode().equals(mode)) {
+		this.changeControlMode(mode);
+		if(hasEncoder) configureJaguar(this.getP(), this.getI(), this.getD());
                 else configureJaguar();
 	    }
 	}
@@ -105,10 +83,10 @@ public class Jaguar {
     private void configureJaguar(double p, double i, double d) {
 	try {
             // Initialize PID and encoder stuff
-            jag.setSpeedReference(CANJaguar.SpeedReference.kQuadEncoder);
-            jag.setPositionReference(CANJaguar.PositionReference.kQuadEncoder);
-            jag.configEncoderCodesPerRev(360);
-            jag.setPID(p, i, d);
+            this.setSpeedReference(CANJaguar.SpeedReference.kQuadEncoder);
+            this.setPositionReference(CANJaguar.PositionReference.kQuadEncoder);
+            this.configEncoderCodesPerRev(360);
+            this.setPID(p, i, d);
             
             // Configuring the rest of the settings
             configureJaguar();
@@ -121,9 +99,9 @@ public class Jaguar {
     
     private void configureJaguar() {
         try {
-            jag.setVoltageRampRate(0.0);
-            jag.configMaxOutputVoltage(12);
-            jag.enableControl();
+            this.setVoltageRampRate(0.0);
+            this.configMaxOutputVoltage(12);
+            this.enableControl();
         }
         catch(CANTimeoutException e) {
 	    e.printStackTrace();
@@ -136,7 +114,7 @@ public class Jaguar {
 	    // Only check for voltage every 50 iterations
 	    if(voltCheckCount >= 50) {
 		voltCheckCount = 0;
-		double incomingVoltage = jag.getBusVoltage();
+		double incomingVoltage = this.getBusVoltage();
 
 		// If battery voltage is too low
 		if(incomingVoltage <= LOWEST_ACCEPTABLE_VOLTAGE) {
@@ -152,49 +130,11 @@ public class Jaguar {
     }
     
     public void stop() {
-        setX(0.0);
-    }
-    
-    public double getX() {
-	try {
-	    return jag.getX();
-	}
-	catch(CANTimeoutException e) {
-	    e.printStackTrace();
-	    System.out.print("Error using getX() on Jaguar #" + ID);
-	}
-	return 0;
-    }
-    
-     public void setX(double amount) {
-	try {
-	    jag.setX(amount);
-	}
-	catch(CANTimeoutException e) {
-	    e.printStackTrace();
-	    System.out.print("Error using setX() on Jaguar #" + ID);
-	}
-    }
-     
-     public double getSpeed() {
         try {
-	    return jag.getSpeed();
-	}
-	catch(CANTimeoutException e) {
-	    e.printStackTrace();
-	    System.out.print("Error using getSpeed() on Jaguar #" + ID);
-	}
-        return 0.0;
-     }
-     
-     public double getOutputCurrent() {
-         try {
-             return jag.getOutputCurrent();
-         }
-         catch(CANTimeoutException e) {
-	    e.printStackTrace();
-	    System.out.print("Error using getCurrent() on Jaguar #" + ID);
-         }
-         return 0.0;
-     }
+            this.setX(0.0);
+        } catch (CANTimeoutException ex) {
+            ex.printStackTrace();
+            System.out.print("Error calling stop() on Jaguar #" + ID);
+        }
+    }
 }
