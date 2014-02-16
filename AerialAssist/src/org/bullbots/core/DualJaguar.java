@@ -36,9 +36,9 @@ public class DualJaguar implements LiveWindowSendable {
             System.out.println(MASTER_JAG.getSpeed());
             
             // If the slave current does not match the master, then update the slave's current to the master's
-            if(SLAVE_JAG.getOutputCurrent() != MASTER_JAG.getOutputCurrent()) {
-                SLAVE_JAG.driveUsingCurrent(MASTER_JAG.getOutputCurrent());
-                System.out.println("Slave jag was updated to " + MASTER_JAG.getOutputCurrent());
+            if(SLAVE_JAG.getOutputVoltage()!= MASTER_JAG.getOutputVoltage()) {
+                SLAVE_JAG.driveUsingVoltage(MASTER_JAG.getOutputVoltage());
+                System.out.println("Slave jag was updated to " + MASTER_JAG.getOutputVoltage());
             }
         }
         catch(CANTimeoutException e) {

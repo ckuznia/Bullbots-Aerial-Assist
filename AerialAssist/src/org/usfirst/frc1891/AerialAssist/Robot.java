@@ -81,7 +81,8 @@ public class Robot extends IterativeRobot {
         LiveWindow.run();
         
         // Continually driving the motors to the setpoint configured in the LiveWindow
-        driveTrain.driveUsingSpeed(RobotMap.dualJag1.setPoint, RobotMap.dualJag2.setPoint);
+        //driveTrain.driveUsingSpeed(RobotMap.dualJag1.setPoint, RobotMap.dualJag2.setPoint);
+        driveTrain.driveUsingSpeed(RobotMap.dualJag1.setPoint, RobotMap.dualJag1.setPoint);
     }
 
     public void testInit() {

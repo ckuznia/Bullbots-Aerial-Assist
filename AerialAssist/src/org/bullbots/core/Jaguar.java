@@ -98,8 +98,8 @@ public class Jaguar extends CANJaguar {
     
     private void configureJaguar() {
         try {
-            this.setVoltageRampRate(0.0);
-            this.configMaxOutputVoltage(12);
+//            this.setVoltageRampRate(0);
+//            this.configMaxOutputVoltage(12);
             this.enableControl();
         }
         catch(CANTimeoutException e) {
