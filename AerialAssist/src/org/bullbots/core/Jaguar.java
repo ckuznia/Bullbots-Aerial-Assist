@@ -48,17 +48,21 @@ public class Jaguar extends CANJaguar {
     
     public void driveUsingSpeed(double RPM) {
         // Speed unit is in RPMs
+        // PIDS are REQUIRED in order to use this mode
         setControlMode(CANJaguar.ControlMode.kSpeed);
         setValue(RPM);
     }
     
     public void driveUsingPosition(double rotations) {
 	// Position unit is in rotations
+        // PIDS are REQUIRED in order to use this mode
         setControlMode(CANJaguar.ControlMode.kPosition);
         setValue(rotations);
     }
     
     public void driveUsingCurrent(double current) {
+        // Current unit is in Amps
+        // PIDS are REQUIRED in order to use this mode
         setControlMode(CANJaguar.ControlMode.kCurrent);
         setValue(current);
     }
@@ -84,7 +88,7 @@ public class Jaguar extends CANJaguar {
             // Initialize PID and encoder stuff
             this.setSpeedReference(CANJaguar.SpeedReference.kQuadEncoder);
             this.setPositionReference(CANJaguar.PositionReference.kQuadEncoder);
-            this.configEncoderCodesPerRev(360);
+            this.configEncoderCodesPerRev(1440);
             this.setPID(p, i, d);
             
             // Configuring the rest of the settings
@@ -98,8 +102,8 @@ public class Jaguar extends CANJaguar {
     
     private void configureJaguar() {
         try {
-//            this.setVoltageRampRate(0);
-//            this.configMaxOutputVoltage(12);
+            this.setVoltageRampRate(0);
+            this.configMaxOutputVoltage(12);
             this.enableControl();
         }
         catch(CANTimeoutException e) {

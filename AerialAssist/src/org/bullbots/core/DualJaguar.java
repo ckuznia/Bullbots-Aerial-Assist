@@ -33,12 +33,10 @@ public class DualJaguar implements LiveWindowSendable {
 	try {
             // Updating the speed of the master jag
             if(MASTER_JAG.getSpeed() != RPM) MASTER_JAG.driveUsingSpeed(RPM);
-            System.out.println(MASTER_JAG.getSpeed());
             
-            // If the slave current does not match the master, then update the slave's current to the master's
+            // If the slave's voltage value does not match the master's, then update the slave's voltage value to the master's
             if(SLAVE_JAG.getOutputVoltage()!= MASTER_JAG.getOutputVoltage()) {
-                SLAVE_JAG.driveUsingVoltage(MASTER_JAG.getOutputVoltage());
-                System.out.println("Slave jag was updated to " + MASTER_JAG.getOutputVoltage());
+                SLAVE_JAG.driveUsingVoltage(MASTER_JAG.getOutputVoltage() / MASTER_JAG.getBusVoltage());
             }
         }
         catch(CANTimeoutException e) {
@@ -55,6 +53,9 @@ public class DualJaguar implements LiveWindowSendable {
     }
     
     public void driveUsingCurrent(double current) {
+        
+        // THIS MODE STILL NEEDS TO BE SETUP
+        
 	MASTER_JAG.driveUsingCurrent(current);
 	SLAVE_JAG.driveUsingCurrent(current);
     }
@@ -71,6 +72,7 @@ public class DualJaguar implements LiveWindowSendable {
     private ITableListener listener = new ITableListener() {
         public void valueChanged(ITable table, String key, Object value, boolean isNew) {
             try {
+                System.out.println("Table: " + table);
                 // Updating values
                 MASTER_JAG.setPID(table.getNumber("p"), table.getNumber("i"), table.getNumber("d"));
                 setPoint = table.getNumber("setpoint");

@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj.CANJaguar;
 import org.usfirst.frc1891.AerialAssist.RobotMap;
 import org.usfirst.frc1891.AerialAssist.commands.*;
 import edu.wpi.first.wpilibj.command.Subsystem;
-import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
 /**
  *
@@ -44,12 +43,17 @@ public class DriveTrain extends Subsystem {
     
     public void driveUsingSpeed(double leftValue, double rightValue) {
         RobotMap.dualJag1.driveUsingSpeed(leftValue);
-        //RobotMap.dualJag2.driveUsingSpeed(rightValue);
+        RobotMap.dualJag2.driveUsingSpeed(rightValue);
     }
     
     public void driveUsingPosition(double leftValue, double rightValue) {
         RobotMap.dualJag1.driveUsingPosition(leftValue);
         RobotMap.dualJag2.driveUsingPosition(rightValue);
+    }
+    
+    public void driveUsingCurrent(double leftValue, double rightValue) {
+        RobotMap.dualJag1.driveUsingCurrent(leftValue);
+        RobotMap.dualJag2.driveUsingCurrent(rightValue);
     }
     
     public void stopDriving() {
