@@ -32,6 +32,8 @@ public class Robot extends IterativeRobot {
     
     public static final double MAX_RPM = 120.0; // 120 RPMs = ~4 FPS
     
+    public static boolean calibrated = false;
+    
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
@@ -70,6 +72,12 @@ public class Robot extends IterativeRobot {
         // continue until interrupted by another command, remove
         // this line or comment it out.
         if (autonomousCommand != null) autonomousCommand.cancel();
+        
+//        if(!calibrated) {
+//            //shooter.calibrate();
+//            RobotMap.winchJags.calibrate();
+//            calibrated = true;
+//        }
     }
     /**
      * This function is called periodically during operator control
@@ -84,8 +92,9 @@ public class Robot extends IterativeRobot {
         LiveWindow.run();
         
         // Continually driving the motors to the setpoint configured in the LiveWindow
-        //driveTrain.driveUsingSpeed(RobotMap.dualJag1.setPoint, RobotMap.dualJag2.setPoint);
         driveTrain.driveUsingSpeed(RobotMap.driveJags1.setPoint, RobotMap.driveJags2.setPoint);
+        
+        //RobotMap.winchJags.driveUsingPosition(1);
     }
     public void testInit() {
          LiveWindow.setEnabled(true);

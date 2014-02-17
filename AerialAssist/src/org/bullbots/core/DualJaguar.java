@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj.tables.ITableListener;
  */
 public class DualJaguar implements LiveWindowSendable {
     
-    private Jaguar MASTER_JAG, SLAVE_JAG;
-    private ITable table; // Table for configuring PIDs
+    protected Jaguar MASTER_JAG, SLAVE_JAG;
+    protected ITable table; // Table for configuring PIDs
     
     public double setPoint = 0.0; // For tunning PIDs
     
@@ -33,11 +33,7 @@ public class DualJaguar implements LiveWindowSendable {
 	try {
             // Updating the speed of the master jag
             if(MASTER_JAG.getSpeed() != RPM) MASTER_JAG.driveUsingSpeed(RPM);
-            
-            // If the slave's voltage value does not match the master's, then update the slave's voltage value to the master's
-            if(SLAVE_JAG.getOutputVoltage()!= MASTER_JAG.getOutputVoltage()) {
-                SLAVE_JAG.driveUsingVoltage(MASTER_JAG.getOutputVoltage() / MASTER_JAG.getBusVoltage());
-            }
+            matchSlaveWithMaster();
         }
         catch(CANTimeoutException e) {
             e.printStackTrace();
@@ -45,9 +41,13 @@ public class DualJaguar implements LiveWindowSendable {
     }
     
     public void driveUsingPosition(double rotations) {
-        
-        // THIS MODE STILL NEEDS TO BE SETUP
-        
+        try {
+            if(MASTER_JAG.getPosition() != rotations) MASTER_JAG.driveUsingPosition(rotations);
+            matchSlaveWithMaster();
+        }
+        catch(CANTimeoutException e) {
+            e.printStackTrace();
+        }
 	MASTER_JAG.driveUsingPosition(rotations);
 	SLAVE_JAG.driveUsingPosition(rotations);
     }
@@ -60,6 +60,18 @@ public class DualJaguar implements LiveWindowSendable {
 	SLAVE_JAG.driveUsingCurrent(current);
     }
     
+    private void matchSlaveWithMaster() {
+        try {
+            // If the slave's voltage value does not match the master's, then update the slave's voltage value to the master's
+            if(SLAVE_JAG.getOutputVoltage()!= MASTER_JAG.getOutputVoltage()) {
+                SLAVE_JAG.driveUsingVoltage(MASTER_JAG.getOutputVoltage() / MASTER_JAG.getBusVoltage());
+            }
+        }
+        catch(CANTimeoutException e) {
+            e.printStackTrace();
+        }
+    }
+    
     public void stop() {
         MASTER_JAG.stop();
         SLAVE_JAG.stop();
@@ -69,10 +81,9 @@ public class DualJaguar implements LiveWindowSendable {
         return "PIDController";
     }
 
-    private ITableListener listener = new ITableListener() {
+    protected ITableListener listener = new ITableListener() {
         public void valueChanged(ITable table, String key, Object value, boolean isNew) {
             try {
-                System.out.println("Table: " + table);
                 // Updating values
                 MASTER_JAG.setPID(table.getNumber("p"), table.getNumber("i"), table.getNumber("d"));
                 setPoint = table.getNumber("setpoint");
