@@ -84,6 +84,9 @@ public class Robot extends IterativeRobot {
      */
     public void teleopPeriodic() {
         Scheduler.getInstance().run();
+        
+        // Driving with joysticks
+        Robot.driveTrain.driveUsingSpeed(Robot.oi.joystickController1.getYAxis() * Robot.MAX_RPM, -Robot.oi.joystickController2.getYAxis() * Robot.MAX_RPM);
     }
     /**
      * This function called periodically during test mode

@@ -129,22 +129,6 @@ Children:
           name: Output Channel (PWM)
           validators: *id005
           value: '2'
-    - Name: IRSensor1
-      Base: Analog Input
-      Children: []
-      Properties:
-        Input Module (Analog): !!robotbuilder.data.properties.ChoicesProperty
-          choices: &id010 ['1', '2']
-          default: '1'
-          name: Input Module (Analog)
-          validators: &id011 [AnalogInput]
-          value: '1'
-        Input Channel (Analog): !!robotbuilder.data.properties.ChoicesProperty
-          choices: &id012 ['1', '2', '3', '4', '5', '6', '7', '8']
-          default: '1'
-          name: Input Channel (Analog)
-          validators: &id013 [AnalogInput]
-          value: '4'
     - Name: shootSwitch
       Base: Limit Switch
       Children: []
@@ -166,6 +150,22 @@ Children:
       Children: []
       Properties:
         Input Module (Analog): !!robotbuilder.data.properties.ChoicesProperty
+          choices: &id010 ['1', '2']
+          default: '1'
+          name: Input Module (Analog)
+          validators: &id011 [AnalogInput]
+          value: '1'
+        Input Channel (Analog): !!robotbuilder.data.properties.ChoicesProperty
+          choices: &id012 ['1', '2', '3', '4', '5', '6', '7', '8']
+          default: '1'
+          name: Input Channel (Analog)
+          validators: &id013 [AnalogInput]
+          value: '5'
+    - Name: IRSensor1
+      Base: Analog Input
+      Children: []
+      Properties:
+        Input Module (Analog): !!robotbuilder.data.properties.ChoicesProperty
           choices: *id010
           default: '1'
           name: Input Module (Analog)
@@ -176,7 +176,7 @@ Children:
           default: '1'
           name: Input Channel (Analog)
           validators: *id013
-          value: '5'
+          value: '4'
     Properties:
       Default Command: !!robotbuilder.data.properties.TypeSelectionProperty {default: None,
         name: Default Command, type: Command, validators: null, value: None}

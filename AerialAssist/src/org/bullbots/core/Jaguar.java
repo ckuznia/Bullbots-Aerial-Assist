@@ -34,7 +34,13 @@ public class Jaguar extends CANJaguar {
     
     private void setValue(double value) {
         try {
-            this.setX(value);
+            // Rounding the value in order not to overload the cRIO
+            double roundedValue = roundValue(value);
+            
+            // Only updating the jaguar if the value has changed\
+            if(roundedValue != this.getX()) {
+                this.setX(roundedValue);
+            }
         } catch (CANTimeoutException ex) {
             ex.printStackTrace();
         }
@@ -139,5 +145,9 @@ public class Jaguar extends CANJaguar {
             ex.printStackTrace();
             System.out.print("Error calling stop() on Jaguar #" + ID);
         }
+    }
+    
+    public double roundValue(double value) {
+        return (double) (int) ((value + 0.005) * 100) / 100;
     }
 }
