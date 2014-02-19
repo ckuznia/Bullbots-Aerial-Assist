@@ -2,6 +2,8 @@ package org.bullbots.core;
 
 import edu.wpi.first.wpilibj.CANJaguar;
 import edu.wpi.first.wpilibj.can.CANTimeoutException;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import org.usfirst.frc1891.AerialAssist.Robot;
 import org.usfirst.frc1891.AerialAssist.RobotMap;
 
 /**
@@ -10,41 +12,63 @@ import org.usfirst.frc1891.AerialAssist.RobotMap;
  */
 public class Winch extends DualJaguar {
     
-    private final double SPEED = -60, APPROACH_SPEED = -15;
-    private final float SLOW_POINT = (float) -3.82;
+    private final double SPEED = -0.5, APPROACH_SPEED = -0.35, UNWIND_SPEED = 0.5;
+    private final float SLOW_POINT = (float) -2.0; // -2.6
+    
+    public static boolean isLocked = false, sleeped = false;
     
     public Winch(int MASTER_ID, int SLAVE_ID, double P, double I, double D) {
         super(MASTER_ID, SLAVE_ID, P, I, D);
+        try {
+            //MASTER_JAG.setPID(P, I, D);
+            MASTER_JAG.enableControl(0.0);
+        } catch (CANTimeoutException ex) {
+            ex.printStackTrace();
+        }
     }
     
     public void calibrate() {
         try {
             // Callibrating the winch...
-            
-            MASTER_JAG.setControlMode(CANJaguar.ControlMode.kPosition);
-            MASTER_JAG.enableControl(0.0);
-            
-            // Running the winch at high speed until it is approaching the limit switch
-            do {
-                System.out.println("driving fast");
-                MASTER_JAG.driveUsingSpeed(SPEED);
+            if(!RobotMap.shooterloadSwitch.get() && !isLocked) {
+                // If it is away from the limit switch
+                if(MASTER_JAG.getPosition() > SLOW_POINT) {
+                    System.out.println("driving fast:"+MASTER_JAG.getPosition());
+                    this.driveUsingVoltage(SPEED);
+                }
+                else { // It is close to the limit switch
+                    System.out.println("driving slow:"+MASTER_JAG.getPosition());
+                    this.driveUsingVoltage(APPROACH_SPEED);
+                }
             }
-            // Making sure the limit switch is not pressed as a safety feature
-            while(MASTER_JAG.getPosition() > SLOW_POINT && !RobotMap.shooterloadSwitch.get());
-            
-            // Now running the winch at low speed until the switch is triggered
-            do {
-                System.out.println("driving slow");
-                MASTER_JAG.driveUsingSpeed(APPROACH_SPEED);
+            else {
+                // Setting locked to true, that way if it gets off the limit switch
+                // (Besides shooting) it will not try to lock again
+                isLocked = true;
+                
+                // Stopping everything
+                this.stop();
+                System.out.println("LOCKED IN PLACE!!!");
+                
+                // Putting a delay before the winch is driven the other way
+                if(!sleeped) {
+                    Thread.sleep(200);
+                    sleeped = true;
+                }
+                
+                // Unwinding the winch to put slack in the line
+                if(MASTER_JAG.getPosition() < 0.0) this.driveUsingVoltage(UNWIND_SPEED);
+                else {
+                    Robot.shooter.setCalibrated(true);
+                    Robot.shooter.setReadyToShoot(true);
+                    SmartDashboard.putBoolean("readytoshoot", true);
+                }
             }
-            while(!RobotMap.shooterloadSwitch.get());
-            
-            // Stopping everything
-            this.stop();
-            System.out.println("DONE");
         }
         catch(CANTimeoutException e) {
             e.printStackTrace();
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
         }
     }
 }

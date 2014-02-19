@@ -39,6 +39,7 @@ public class Jaguar extends CANJaguar {
             
             // Only updating the jaguar if the value has changed\
             if(roundedValue != this.getX()) {
+                System.out.println("aaaaaaaaa");
                 this.setX(roundedValue);
             }
         } catch (CANTimeoutException ex) {
