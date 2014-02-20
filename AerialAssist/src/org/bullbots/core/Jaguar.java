@@ -15,7 +15,7 @@ public class Jaguar extends CANJaguar {
         
     public Jaguar(int ID, double p, double i, double d) throws CANTimeoutException {
 	super(ID);
-        
+        System.out.println("Found: " + ID + " with encoder");
         this.ID = ID;
         hasEncoder = true;
         // Initializing jaguar
@@ -25,6 +25,7 @@ public class Jaguar extends CANJaguar {
     
     public Jaguar(int ID) throws CANTimeoutException {
         super(ID);
+        System.out.println("Found: " + ID);
         this.ID = ID;
         hasEncoder = false;
         // Initializing jaguar
@@ -37,11 +38,17 @@ public class Jaguar extends CANJaguar {
             // Rounding the value in order not to overload the cRIO
             double roundedValue = roundValue(value);
             
-            // Only updating the jaguar if the value has changed\
-            if(roundedValue != this.getX()) {
-                System.out.println("aaaaaaaaa");
+            //System.out.println("SETVALUE ::: roundedValue: " + roundedValue + " getX(): " + this.getX());
+            
+            // BELOW IS COMMENTED OUT because i wanted to make sure
+            // that the value to the jaguar was continually set, otherwise the
+            // motor will stop. So i removed the 'if' statement
+            
+            // Only updating the jaguar if the value has changed
+            //if(roundedValue != this.getX()) {
                 this.setX(roundedValue);
-            }
+                //System.out.println("setX was called at " + roundedValue);
+            //}
         } catch (CANTimeoutException ex) {
             ex.printStackTrace();
         }
@@ -111,7 +118,7 @@ public class Jaguar extends CANJaguar {
         try {
             this.setVoltageRampRate(0);
             this.configMaxOutputVoltage(12);
-            this.enableControl();
+            this.enableControl(0.0);
         }
         catch(CANTimeoutException e) {
 	    e.printStackTrace();
@@ -140,12 +147,7 @@ public class Jaguar extends CANJaguar {
     }
     
     public void stop() {
-        try {
-            this.setX(0.0);
-        } catch (CANTimeoutException ex) {
-            ex.printStackTrace();
-            System.out.print("Error calling stop() on Jaguar #" + ID);
-        }
+        driveUsingVoltage(0.0);
     }
     
     public double roundValue(double value) {

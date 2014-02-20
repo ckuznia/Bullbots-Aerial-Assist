@@ -19,9 +19,19 @@ public class Winch extends DualJaguar {
     
     public Winch(int MASTER_ID, int SLAVE_ID, double P, double I, double D) {
         super(MASTER_ID, SLAVE_ID, P, I, D);
+        System.out.println("0 set");
+    }
+    
+    public void test() {
+        
         try {
-            //MASTER_JAG.setPID(P, I, D);
-            MASTER_JAG.enableControl(0.0);
+            if(MASTER_JAG.getPosition() > -3.0) {
+                System.out.println("test was called!!! :)");
+                this.driveUsingVoltage(0.5);
+            }
+            else {
+                this.stop();
+            }
         } catch (CANTimeoutException ex) {
             ex.printStackTrace();
         }
@@ -68,6 +78,14 @@ public class Winch extends DualJaguar {
         catch(CANTimeoutException e) {
             e.printStackTrace();
         } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    public void showPosition() {
+        try {
+            System.out.println("Position = " + MASTER_JAG.getPosition());
+        } catch (CANTimeoutException ex) {
             ex.printStackTrace();
         }
     }

@@ -34,6 +34,7 @@ public class DualJaguar implements LiveWindowSendable {
             // Rounding values to 2 decimal places, in order not to overload the cRIO
             double roundedSpeed = MASTER_JAG.roundValue(MASTER_JAG.getSpeed());
             double roundedRPM = MASTER_JAG.roundValue(RPM);
+            //System.out.println("roundedSpeed: " + roundedSpeed + " roundedRPM: " + roundedRPM);
             // Updating the speed of the master jag
             if(roundedSpeed != roundedRPM) MASTER_JAG.driveUsingSpeed(RPM);
             matchSlaveWithMaster();

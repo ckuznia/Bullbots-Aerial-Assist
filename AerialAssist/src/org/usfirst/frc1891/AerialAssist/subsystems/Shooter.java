@@ -40,7 +40,7 @@ public class Shooter extends Subsystem {
     
     private boolean isCalibrated = false, readyToShoot = false, shootRequested = false, motorOffSwitch = false, tiltRequested = false, isDown = false;
     private final int shootButton = 1, tiltButton = 2;
-    private final double minPotValue = 3.2, maxPotValue = 4.91, midPotValue = ((maxPotValue - minPotValue) / 2) + minPotValue, potTolerance = 0.75;
+    private final double minPotValue = 3.2, maxPotValue = 4.91, midPotValue = (minPotValue + maxPotValue) / 2, potTolerance = 0.75;
     private final double ANGLE_MOTOR_SPEED = 0.5;
     
     protected void initDefaultCommand() {}
@@ -50,6 +50,15 @@ public class Shooter extends Subsystem {
     }
     
     public void update() {
+        updateShooting();
+        updateTilting();
+    }
+    
+    public void test() {
+        RobotMap.winchJags.test();
+    }
+    
+    private void updateShooting() {
         // If shoot button is pressed and shooter is ready to shoot
         if(readyToShoot) {
             if(Robot.oi.joystickController1.isButtonDown(shootButton) || Robot.oi.joystickController2.isButtonDown(shootButton)) {
@@ -67,8 +76,14 @@ public class Shooter extends Subsystem {
                 //prepForShoot();
             }
         }
+    }
+    
+    private void updateTilting() {
         
-       
+        
+        
+        // OLD
+        
         // Updating tilt
         if(!tiltRequested) {
             isDown = (potentiometer.getValue() < midPotValue);

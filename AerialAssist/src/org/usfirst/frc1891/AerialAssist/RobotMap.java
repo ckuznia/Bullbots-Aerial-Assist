@@ -66,8 +66,8 @@ public class RobotMap {
        
         
         driveJags1 = new DualJaguar(1, 2, 0.5, 0.0, 0.05);
-        driveJags2 = new DualJaguar(3, 4, 0.5, 0.0, 0.05);
-        winchJags = new Winch(6, 5, 0.5, 0.0, 0.05);
+        driveJags2 = new DualJaguar(6, 5, 0.5, 0.0, 0.05);
+        winchJags = new Winch(3, 4, 0.5, 0.0, 0.05);
         
         // Adding components to the live window
         LiveWindow.addActuator("Drive Train", "Dual Jaguar 1", RobotMap.driveJags1);

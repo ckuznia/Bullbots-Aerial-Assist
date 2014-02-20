@@ -77,11 +77,13 @@ public class Robot extends IterativeRobot {
      */
     public void teleopPeriodic() {
         Scheduler.getInstance().run();
+        //driveTrain.driveUsingVoltage(Robot.oi.joystickController1.getYAxis(), -Robot.oi.joystickController2.getYAxis());
         
         //if(!shooter.isCalibrated()) ;//Robot.shooter.calibrate();
         //else {
             //shooter.update();
             // Driving with joysticks
+            //shooter.test();
             driveTrain.driveUsingSpeed(Robot.oi.joystickController1.getYAxis() * Robot.MAX_RPM, -Robot.oi.joystickController2.getYAxis() * Robot.MAX_RPM);
         //}
     }
@@ -90,6 +92,8 @@ public class Robot extends IterativeRobot {
      */
     public void testPeriodic() {
         LiveWindow.run();
+        
+        //RobotMap.winchJags.showPosition();
         
         // Continually driving the motors to the setpoint configured in the LiveWindow
         driveTrain.driveUsingSpeed(RobotMap.driveJags1.setPoint, RobotMap.driveJags2.setPoint);
