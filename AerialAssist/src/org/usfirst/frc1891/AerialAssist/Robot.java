@@ -10,6 +10,7 @@
 package org.usfirst.frc1891.AerialAssist;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.can.CANTimeoutException;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -72,11 +73,83 @@ public class Robot extends IterativeRobot {
         // this line or comment it out.
         if (autonomousCommand != null) autonomousCommand.cancel();
     }
+    
+    int x = 0;
+    
     /**
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
+        
+        /*
+        Stuff i found out:
+            - CANJaguars will keep running at the speed you set them at,
+            they do NOT need to be reassigned their value.
+        */
+        
         Scheduler.getInstance().run();
+        try {
+            
+            
+            //RobotMap.driveJags1.getMasterJag().setPID(0.5, 0, 0.002);
+            
+            //RobotMap.driveJags1.driveUsingVoltage(0.25);
+            //RobotMap.driveJags1.driveUsingSpeed(60);
+            
+            int maxCurrent = 200;
+            RobotMap.driveJags1.driveUsingSpeed(Robot.oi.joystickController1.getYAxis() * maxCurrent);
+            
+            /*int iterations = 75;
+            
+            if(x < iterations) {
+                System.out.println("\t\tspeed " + x);
+                RobotMap.driveJags1.driveUsingSpeed(60);
+            }
+            else if (x < iterations * 2){
+                System.out.println("\t\tvoltage " + x);
+                RobotMap.driveJags1.driveUsingVoltage(0.25);
+            }
+            else if (x < iterations * 3){
+                System.out.println("\t\tposition " + x);
+                RobotMap.driveJags1.driveUsingPosition(60);
+            }
+            else if (x < iterations * 4){
+                System.out.println("\t\tcurrent " + x);
+                RobotMap.driveJags1.driveUsingCurrent(100);
+            }
+            else {
+                RobotMap.driveJags1.stop();
+            }
+            x++;*/
+            
+            
+            
+            
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        
+        
+        
+        
+        
+        /*
+        
+        
+        OLD CODE IS COMMENTED OUT BELOW, ABOVE IS FOR TESTING ONLY
+        
+        
+        */
+        
+        
+        
+        
+        
+        
+        
+        /*
+        Scheduler.getInstance().run();
+        
         //driveTrain.driveUsingVoltage(Robot.oi.joystickController1.getYAxis(), -Robot.oi.joystickController2.getYAxis());
         
         //if(!shooter.isCalibrated()) ;//Robot.shooter.calibrate();
@@ -86,6 +159,9 @@ public class Robot extends IterativeRobot {
             //shooter.test();
             driveTrain.driveUsingSpeed(Robot.oi.joystickController1.getYAxis() * Robot.MAX_RPM, -Robot.oi.joystickController2.getYAxis() * Robot.MAX_RPM);
         //}
+        
+        
+        */
     }
     /**
      * This function called periodically during test mode

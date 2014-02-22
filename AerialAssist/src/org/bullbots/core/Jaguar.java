@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.can.CANTimeoutException;
 public class Jaguar extends CANJaguar {
         
     private final int ID;
-    private final double LOWEST_ACCEPTABLE_VOLTAGE = 10.0;
+    private final double LOWEST_ACCEPTABLE_VOLTAGE = 11.5;
     private int voltCheckCount = 0;
     private final boolean hasEncoder;
         
@@ -35,6 +35,19 @@ public class Jaguar extends CANJaguar {
     
     private void setValue(double value) {
         try {
+            
+            /*
+            this.setX(value);
+            System.out.println("setX was called at " + value + " on Jaguar # " + ID + "\n");
+            */
+            
+            /*
+            OLD CODE IS COMMENTED BELOW, ABOVE IS FOR TESTING
+            */
+            
+            
+            
+            
             // Rounding the value in order not to overload the cRIO
             double roundedValue = roundValue(value);
             
@@ -46,9 +59,14 @@ public class Jaguar extends CANJaguar {
             
             // Only updating the jaguar if the value has changed
             //if(roundedValue != this.getX()) {
+                // Making sure the voltage isn't getting to low
+                checkIncomingVoltage();
                 this.setX(roundedValue);
-                //System.out.println("setX was called at " + roundedValue);
+                //System.out.println("setX was called at " + roundedValue + " on Jaguar # " + ID + "\n");
             //}
+                    
+                    
+            
         } catch (CANTimeoutException ex) {
             ex.printStackTrace();
         }
@@ -83,8 +101,6 @@ public class Jaguar extends CANJaguar {
     
     public void setControlMode(CANJaguar.ControlMode mode) {
 	try {
-	    checkIncomingVoltage();
-            
 	    if(!this.getControlMode().equals(mode)) {
 		this.changeControlMode(mode);
 		if(hasEncoder) configureJaguar(this.getP(), this.getI(), this.getD());
@@ -128,8 +144,8 @@ public class Jaguar extends CANJaguar {
     
     private void checkIncomingVoltage() {
 	try {
-	    // Only check for voltage every 50 iterations
-	    if(voltCheckCount >= 50) {
+	    // Only check for voltage every 75 iterations
+	    if(voltCheckCount >= 75) {
 		voltCheckCount = 0;
 		double incomingVoltage = this.getBusVoltage();
                 
