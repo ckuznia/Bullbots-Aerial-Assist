@@ -75,6 +75,7 @@ public class Robot extends IterativeRobot {
     }
     
     int x = 0;
+    boolean called = false;
     
     /**
      * This function is called periodically during operator control
@@ -96,28 +97,39 @@ public class Robot extends IterativeRobot {
             //RobotMap.driveJags1.driveUsingVoltage(0.25);
             //RobotMap.driveJags1.driveUsingSpeed(60);
             
-            int maxCurrent = 200;
-            RobotMap.driveJags1.driveUsingSpeed(Robot.oi.joystickController1.getYAxis() * maxCurrent);
+            /*
+            voltage : moves until stopped
+            speed :
+            position :
+            current :
+            */
             
-            /*int iterations = 75;
+            //int maxCurrent = 200;
+            if(!called) {
+                System.out.println("SPEED called on driveJags1");
+                RobotMap.driveJags1.driveUsingSpeed(60);
+                //called = true;
+            }
             
-            if(x < iterations) {
+            //int iterations = 55;
+            
+            /*if(x == 0) {
                 System.out.println("\t\tspeed " + x);
                 RobotMap.driveJags1.driveUsingSpeed(60);
             }
-            else if (x < iterations * 2){
+            else if (x == iterations){
                 System.out.println("\t\tvoltage " + x);
                 RobotMap.driveJags1.driveUsingVoltage(0.25);
             }
-            else if (x < iterations * 3){
+            else if (x == iterations * 2){
                 System.out.println("\t\tposition " + x);
                 RobotMap.driveJags1.driveUsingPosition(60);
             }
-            else if (x < iterations * 4){
+            else if (x == iterations * 3){
                 System.out.println("\t\tcurrent " + x);
                 RobotMap.driveJags1.driveUsingCurrent(100);
             }
-            else {
+            else if(x == iterations * 4) {
                 RobotMap.driveJags1.stop();
             }
             x++;*/

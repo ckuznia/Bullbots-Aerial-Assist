@@ -62,7 +62,7 @@ public class Jaguar extends CANJaguar {
                 // Making sure the voltage isn't getting to low
                 checkIncomingVoltage();
                 this.setX(roundedValue);
-                //System.out.println("setX was called at " + roundedValue + " on Jaguar # " + ID + "\n");
+                System.out.println("setX was called at " + roundedValue + " on Jaguar # " + ID + "\n");
             //}
                     
                     
