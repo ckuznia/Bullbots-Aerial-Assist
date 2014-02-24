@@ -104,7 +104,10 @@ public class Robot extends IterativeRobot {
             current :
             */
             
-            //int maxCurrent = 200;
+            int maxCurrent = 200;
+            RobotMap.driveJags1.driveUsingSpeed(Robot.oi.joystickController1.getYAxis() * maxCurrent);
+            
+            /*
             if(!called) {
                 System.out.println("SPEED called on driveJags1");
                 RobotMap.driveJags1.driveUsingSpeed(60);
