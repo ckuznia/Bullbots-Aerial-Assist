@@ -1,5 +1,6 @@
 package org.bullbots.core;
 
+import edu.wpi.first.wpilibj.CANJaguar;
 import edu.wpi.first.wpilibj.can.CANTimeoutException;
 import edu.wpi.first.wpilibj.livewindow.LiveWindowSendable;
 import edu.wpi.first.wpilibj.tables.ITable;
@@ -32,11 +33,11 @@ public class DualJaguar implements LiveWindowSendable {
     public void driveUsingSpeed(double RPM) {
 	try {
             // Rounding values to 2 decimal places, in order not to overload the cRIO
-            double roundedSpeed = MASTER_JAG.roundValue(MASTER_JAG.getSpeed());
-            double roundedRPM = MASTER_JAG.roundValue(RPM);
-            //System.out.println("roundedSpeed: " + roundedSpeed + " roundedRPM: " + roundedRPM);
+            double roundedSetValue = MASTER_JAG.roundValue(RPM);
+            double roundedGetValue = MASTER_JAG.roundValue(MASTER_JAG.getSpeed());            
+            
             // Updating the speed of the master jag
-            if(roundedSpeed != roundedRPM) MASTER_JAG.driveUsingSpeed(RPM);
+            if(roundedGetValue != roundedSetValue) MASTER_JAG.driveUsingSpeed(roundedSetValue);
             matchSlaveWithMaster();
         }
         catch(CANTimeoutException e) {
@@ -45,31 +46,53 @@ public class DualJaguar implements LiveWindowSendable {
     }
     
     public void driveUsingPosition(double rotations) {
+        MASTER_JAG.driveUsingPosition(rotations);
+        matchSlaveWithMaster();
+    }
+    
+    public void driveUsingCurrent(double current) {
         try {
-            if(MASTER_JAG.getPosition() != rotations) MASTER_JAG.driveUsingPosition(rotations);
+            // Rounding values to 2 decimal places, in order not to overload the cRIO
+            double roundedSetValue = MASTER_JAG.roundValue(current);
+            double roundedGetValue = MASTER_JAG.roundValue(MASTER_JAG.getOutputCurrent());
+            
+            // Updating the speed of the master jag
+            if(roundedGetValue != roundedSetValue) MASTER_JAG.driveUsingCurrent(roundedSetValue);
             matchSlaveWithMaster();
         }
         catch(CANTimeoutException e) {
             e.printStackTrace();
         }
-	MASTER_JAG.driveUsingPosition(rotations);
-	SLAVE_JAG.driveUsingPosition(rotations);
-    }
-    
-    public void driveUsingCurrent(double current) {
-        
-        // THIS MODE STILL NEEDS TO BE SETUP
-        
-	MASTER_JAG.driveUsingCurrent(current);
-	SLAVE_JAG.driveUsingCurrent(current);
     }
     
     private void matchSlaveWithMaster() {
         try {
+            
+            /*MASTER_JAG.setControlMode(CANJaguar.ControlMode.kPercentVbus);
+            SLAVE_JAG.setControlMode(CANJaguar.ControlMode.kPercentVbus);
+            if(SLAVE_JAG.getOutputVoltage() != MASTER_JAG.getX()) {
+                System.out.println("Updated slave motor speed, master is at " + MASTER_JAG.getOutputVoltage() + " bus at: " + MASTER_JAG.getBusVoltage());
+                SLAVE_JAG.driveUsingVoltage(MASTER_JAG.getX());
+            }*/
+            
+            
+            /*
+            OLD CODE IS COMMENTED BELOW, TEST CODE ABOVE
+            */
+            
+            
+            
+            
+            
+            
+            
             // If the slave's voltage value does not match the master's, then update the slave's voltage value to the master's
             if(SLAVE_JAG.getOutputVoltage()!= MASTER_JAG.getOutputVoltage()) {
+                System.out.println("Updated slave motor speed, master is at " + MASTER_JAG.getOutputVoltage() + " bus at: " + MASTER_JAG.getBusVoltage());
                 SLAVE_JAG.driveUsingVoltage(MASTER_JAG.getOutputVoltage() / MASTER_JAG.getBusVoltage());
             }
+            
+            
         }
         catch(CANTimeoutException e) {
             e.printStackTrace();
@@ -136,4 +159,12 @@ public class DualJaguar implements LiveWindowSendable {
     }
     
     public void stopLiveWindowMode() {}
+    
+    public Jaguar getMasterJag() {
+        return MASTER_JAG;
+    }
+    
+    public Jaguar getSlaveJag() {
+        return SLAVE_JAG;
+    }
 }
