@@ -64,7 +64,7 @@ public class Robot extends IterativeRobot {
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
-//        Scheduler.getInstance().run();
+        Scheduler.getInstance().run();
     }
     public void teleopInit() {
 	// This makes sure that the autonomous stops running when
@@ -81,28 +81,14 @@ public class Robot extends IterativeRobot {
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
-        
-        /*
-        Stuff i found out:
-            - CANJaguars will keep running at the speed you set them at,
-            they do NOT need to be reassigned their value.
-        */
-        
         Scheduler.getInstance().run();
         try {
-            
-            
-            //RobotMap.driveJags1.getMasterJag().setPID(0.5, 0, 0.002);
-            
-            //RobotMap.driveJags1.driveUsingVoltage(0.25);
-            //RobotMap.driveJags1.driveUsingSpeed(60);
-            
             /*
-            voltage : moves until stopped
-            speed :
-            position :
-            current :
+            The line below acts as a temporary fix for a bug, the Jaguars' PIDs were
+            being reset, so this line ensures that the PIDs are NOT at 0.
             */
+            RobotMap.driveJags1.getMasterJag().setPID(0.5, 0, 0.002);
+            
             
             int maxCurrent = 200;
             RobotMap.driveJags1.driveUsingSpeed(Robot.oi.joystickController1.getYAxis() * maxCurrent);
@@ -112,9 +98,9 @@ public class Robot extends IterativeRobot {
                 System.out.println("SPEED called on driveJags1");
                 RobotMap.driveJags1.driveUsingSpeed(60);
                 //called = true;
-            }
+            }*/
             
-            //int iterations = 55;
+            //int iterations = 100;
             
             /*if(x == 0) {
                 System.out.println("\t\tspeed " + x);
