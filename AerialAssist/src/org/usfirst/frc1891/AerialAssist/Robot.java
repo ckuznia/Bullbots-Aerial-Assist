@@ -75,94 +75,48 @@ public class Robot extends IterativeRobot {
     }
     
     int x = 0;
-    boolean called = false;
     
     /**
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
         Scheduler.getInstance().run();
-        try {
-            /*
-            The line below acts as a temporary fix for a bug, the Jaguars' PIDs were
-            being reset, so this line ensures that the PIDs are NOT at 0.
-            */
-            RobotMap.driveJags1.getMasterJag().setPID(0.5, 0, 0.002);
-            
-            
-            int maxCurrent = 200;
-            RobotMap.driveJags1.driveUsingSpeed(Robot.oi.joystickController1.getYAxis() * maxCurrent);
-            
-            /*
-            if(!called) {
-                System.out.println("SPEED called on driveJags1");
-                RobotMap.driveJags1.driveUsingSpeed(60);
-                //called = true;
-            }*/
-            
-            //int iterations = 100;
-            
-            /*if(x == 0) {
-                System.out.println("\t\tspeed " + x);
-                RobotMap.driveJags1.driveUsingSpeed(60);
-            }
-            else if (x == iterations){
-                System.out.println("\t\tvoltage " + x);
-                RobotMap.driveJags1.driveUsingVoltage(0.25);
-            }
-            else if (x == iterations * 2){
-                System.out.println("\t\tposition " + x);
-                RobotMap.driveJags1.driveUsingPosition(60);
-            }
-            else if (x == iterations * 3){
-                System.out.println("\t\tcurrent " + x);
-                RobotMap.driveJags1.driveUsingCurrent(100);
-            }
-            else if(x == iterations * 4) {
-                RobotMap.driveJags1.stop();
-            }
-            x++;*/
-            
-            
-            
-            
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        //RobotMap.driveJags1.getMasterJag().setPID(0.5, 0, 0.002);
+        
+        RobotMap.driveJags1.driveUsingSpeed(Robot.oi.joystickController1.getYAxis() * MAX_RPM);
+        
+        
+        /*int iterations = 55;        
+        if(x == 0) {
+            System.out.println("\t\tspeed " + x);
+            RobotMap.driveJags1.driveUsingSpeed(60);
         }
+        else if (x == iterations){
+            System.out.println("\t\tvoltage " + x);
+            RobotMap.driveJags1.driveUsingVoltage(0.45);
+        }
+        else if (x == iterations * 2){
+            System.out.println("\t\tposition " + x);
+            RobotMap.driveJags1.driveUsingPosition(60);
+        }
+        else if (x == iterations * 3){
+            System.out.println("\t\tcurrent " + x);
+            RobotMap.driveJags1.driveUsingCurrent(110);
+        }
+        else if(x == iterations * 4) {
+            RobotMap.driveJags1.stop();
+       }
+       x++;*/
         
         
-        
-        
-        
-        /*
-        
-        
-        OLD CODE IS COMMENTED OUT BELOW, ABOVE IS FOR TESTING ONLY
-        
-        
-        */
-        
-        
-        
-        
-        
-        
-        
-        /*
-        Scheduler.getInstance().run();
-        
-        //driveTrain.driveUsingVoltage(Robot.oi.joystickController1.getYAxis(), -Robot.oi.joystickController2.getYAxis());
         
         //if(!shooter.isCalibrated()) ;//Robot.shooter.calibrate();
         //else {
             //shooter.update();
             // Driving with joysticks
             //shooter.test();
-            driveTrain.driveUsingSpeed(Robot.oi.joystickController1.getYAxis() * Robot.MAX_RPM, -Robot.oi.joystickController2.getYAxis() * Robot.MAX_RPM);
+            //driveTrain.driveUsingSpeed(Robot.oi.joystickController1.getYAxis() * Robot.MAX_RPM, -Robot.oi.joystickController2.getYAxis() * Robot.MAX_RPM);
         //}
-        
-        
-        */
     }
     /**
      * This function called periodically during test mode

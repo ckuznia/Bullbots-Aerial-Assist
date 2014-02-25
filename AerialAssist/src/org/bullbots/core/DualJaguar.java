@@ -67,32 +67,10 @@ public class DualJaguar implements LiveWindowSendable {
     
     private void matchSlaveWithMaster() {
         try {
-            
-            /*MASTER_JAG.setControlMode(CANJaguar.ControlMode.kPercentVbus);
-            SLAVE_JAG.setControlMode(CANJaguar.ControlMode.kPercentVbus);
-            if(SLAVE_JAG.getOutputVoltage() != MASTER_JAG.getX()) {
-                System.out.println("Updated slave motor speed, master is at " + MASTER_JAG.getOutputVoltage() + " bus at: " + MASTER_JAG.getBusVoltage());
-                SLAVE_JAG.driveUsingVoltage(MASTER_JAG.getX());
-            }*/
-            
-            
-            /*
-            OLD CODE IS COMMENTED BELOW, TEST CODE ABOVE
-            */
-            
-            
-            
-            
-            
-            
-            
             // If the slave's voltage value does not match the master's, then update the slave's voltage value to the master's
             if(SLAVE_JAG.getOutputVoltage()!= MASTER_JAG.getOutputVoltage()) {
-                System.out.println("Updated slave motor speed, master is at " + MASTER_JAG.getOutputVoltage() + " bus at: " + MASTER_JAG.getBusVoltage());
                 SLAVE_JAG.driveUsingVoltage(MASTER_JAG.getOutputVoltage() / MASTER_JAG.getBusVoltage());
             }
-            
-            
         }
         catch(CANTimeoutException e) {
             e.printStackTrace();

@@ -9,23 +9,29 @@ import edu.wpi.first.wpilibj.can.CANTimeoutException;
 public class Jaguar extends CANJaguar {
         
     private final int ID;
+    private double P, I, D;
     private final double LOWEST_ACCEPTABLE_VOLTAGE = 11.5;
     private int voltCheckCount = 0;
     private final boolean hasEncoder;
         
-    public Jaguar(int ID, double p, double i, double d) throws CANTimeoutException {
+    public Jaguar(final int ID, final double P, final double I, final double D) throws CANTimeoutException {
 	super(ID);
-        System.out.println("Found: " + ID + " with encoder");
+        System.out.println("Found Jaguar #" + ID + ", Jaguar configuration will require an encoder");
+        this.P = P;
+        this.I = I;
+        this.D = D;
+        
         this.ID = ID;
         hasEncoder = true;
         // Initializing jaguar
-        configureJaguar(p, i, d);
+        configureJaguarWithEncoder();
         checkIncomingVoltage();
     }
     
     public Jaguar(int ID) throws CANTimeoutException {
         super(ID);
-        System.out.println("Found: " + ID);
+        System.out.println("Found Jaguar #" + ID);
+        
         this.ID = ID;
         hasEncoder = false;
         // Initializing jaguar
@@ -35,38 +41,15 @@ public class Jaguar extends CANJaguar {
     
     private void setValue(double value) {
         try {
-            
-            /*
-            this.setX(value);
-            System.out.println("setX was called at " + value + " on Jaguar # " + ID + "\n");
-            */
-            
-            /*
-            OLD CODE IS COMMENTED BELOW, ABOVE IS FOR TESTING
-            */
-            
-            
-            
-            
             // Rounding the value in order not to overload the cRIO
             double roundedValue = roundValue(value);
             
-            //System.out.println("SETVALUE ::: roundedValue: " + roundedValue + " getX(): " + this.getX());
-            
-            // BELOW IS COMMENTED OUT because i wanted to make sure
-            // that the value to the jaguar was continually set, otherwise the
-            // motor will stop. So i removed the 'if' statement
-            
             // Only updating the jaguar if the value has changed
-            //if(roundedValue != this.getX()) {
+            if(roundedValue != this.getX()) {
                 // Making sure the voltage isn't getting to low
                 checkIncomingVoltage();
                 this.setX(roundedValue);
-                //System.out.println("setX was called at " + roundedValue + " on Jaguar # " + ID + "\n");
-            //}
-                    
-                    
-            
+            }
         } catch (CANTimeoutException ex) {
             ex.printStackTrace();
         }
@@ -103,30 +86,30 @@ public class Jaguar extends CANJaguar {
 	try {
 	    if(!this.getControlMode().equals(mode)) {
 		this.changeControlMode(mode);
-		if(hasEncoder) configureJaguar(this.getP(), this.getI(), this.getD());
+		if(hasEncoder) configureJaguarWithEncoder();
                 else configureJaguar();
 	    }
 	}
         catch(CANTimeoutException e){
 	    e.printStackTrace();
-	    System.out.print("Error setting the control mode " + mode + " on Jaguar #" + ID);
+	    System.out.println("Error setting the control mode " + mode + " on Jaguar #" + ID);
 	}
     }
     
-    private void configureJaguar(double p, double i, double d) {
+    private void configureJaguarWithEncoder() {
 	try {
             // Initialize PID and encoder stuff
             this.setSpeedReference(CANJaguar.SpeedReference.kQuadEncoder);
             this.setPositionReference(CANJaguar.PositionReference.kQuadEncoder);
             this.configEncoderCodesPerRev(1440);
-            this.setPID(p, i, d);
+            this.setPID(P, I, D);
             
             // Configuring the rest of the settings
             configureJaguar();
 	}
 	catch(CANTimeoutException e) {
 	    e.printStackTrace();
-	    System.out.print("Error configuring Jaguar #" + ID);
+	    System.out.println("Error configuring Jaguar #" + ID);
 	}
     }
     
@@ -138,8 +121,20 @@ public class Jaguar extends CANJaguar {
         }
         catch(CANTimeoutException e) {
 	    e.printStackTrace();
-	    System.out.print("Error configuring Jaguar #" + ID);
+	    System.out.println("Error configuring Jaguar #" + ID);
 	}
+    }
+    
+    public void setPID(double P, double I, double D) {
+        try {
+            super.setPID(P, I, D);
+            this.P = P;
+            this.I = I;
+            this.D = D;
+        } catch (CANTimeoutException ex) {
+            ex.printStackTrace();
+            System.out.println("Error configuring PIDs on Jaguar #" + ID);
+        }
     }
     
     private void checkIncomingVoltage() {
@@ -151,14 +146,14 @@ public class Jaguar extends CANJaguar {
                 
 		// If battery voltage is too low
 		if(incomingVoltage <= LOWEST_ACCEPTABLE_VOLTAGE) {
-		    System.out.print("WARNING! Incoming voltage is at " + incomingVoltage + "v on Jaguar #" + ID);
+		    System.out.println("WARNING! Incoming voltage is at " + incomingVoltage + "v on Jaguar #" + ID);
 		}
 	    }
             else voltCheckCount++;
 	}
 	catch(CANTimeoutException e) {
 	    e.printStackTrace();
-	    System.out.print("Error checking the incoming voltage of Jaguar #" + ID);
+	    System.out.println("Error checking the incoming voltage of Jaguar #" + ID);
 	}
     }
     
