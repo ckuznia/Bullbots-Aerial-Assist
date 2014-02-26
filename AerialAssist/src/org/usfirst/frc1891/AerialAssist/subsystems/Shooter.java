@@ -38,7 +38,7 @@ public class Shooter extends Subsystem {
     5: winch can now be pulled back down (start back at #2 is in "ready to lock" position)
     */
     
-    private boolean isCalibrated = false, readyToShoot = false, shootRequested = false, motorOffSwitch = false, tiltRequested = false, isDown = false;
+    private boolean isCalibrated = false, readyToShoot = false, shootRequested = false, motorOffSwitch = false, movingShooter = false, isDown = false;
     private final int shootButton = 1, tiltButton = 2;
     private final double minPotValue = 3.2, maxPotValue = 4.91, midPotValue = (minPotValue + maxPotValue) / 2, potTolerance = 0.75;
     private final double ANGLE_MOTOR_SPEED = 0.5;
@@ -47,6 +47,8 @@ public class Shooter extends Subsystem {
     
     public Shooter() {
          System.out.println("midPotValue:" + midPotValue);
+         
+         
     }
     
     public void update() {
@@ -85,7 +87,7 @@ public class Shooter extends Subsystem {
         // OLD
         
         // Updating tilt
-        if(!tiltRequested) {
+        /*if(!tiltRequested) {
             isDown = (potentiometer.getValue() < midPotValue);
         }
         
@@ -118,6 +120,7 @@ public class Shooter extends Subsystem {
                 }
             }
         }
+        */
     }
     
     private void shootAndRelock() {

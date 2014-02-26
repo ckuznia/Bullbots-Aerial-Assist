@@ -25,6 +25,7 @@ public class Jaguar extends CANJaguar {
         hasEncoder = true;
         // Initializing jaguar
         configureJaguarWithEncoder();
+        changeControlMode(CANJaguar.ControlMode.kPercentVbus);
         checkIncomingVoltage();
     }
     
@@ -36,7 +37,45 @@ public class Jaguar extends CANJaguar {
         hasEncoder = false;
         // Initializing jaguar
         configureJaguar();
+        changeControlMode(CANJaguar.ControlMode.kPercentVbus);
         checkIncomingVoltage();
+    }
+    
+    public void printSettings() {
+        try {
+            // Switching to a mode that uses PIDs, otherwise the
+            // getP(), getI(), and getD() will all show up as 0. 
+            changeControlMode(CANJaguar.ControlMode.kSpeed);
+            
+            // Showing information about the Jagaur's settings
+            System.out.println("\nJagaur #" + ID + " Settings:");
+            System.out.println("\t\tBus Voltage: " + this.getBusVoltage());
+            System.out.println("\t\tSmartDashboard Type: " + this.getSmartDashboardType());
+            System.out.println("\t\tControl Mode: " + this.getControlMode().value + 
+                    "\n\t\t\t" + CANJaguar.ControlMode.kPercentVbus.value + " -> kPercentVbus" +
+                    "\n\t\t\t" + CANJaguar.ControlMode.kCurrent.value + " -> kCurrent" +
+                    "\n\t\t\t" + CANJaguar.ControlMode.kSpeed.value + " -> kSpeed" +
+                    "\n\t\t\t" + CANJaguar.ControlMode.kPosition.value +" -> kPosition" +
+                    "\n\t\t\t" + CANJaguar.ControlMode.kVoltage.value + " -> kVoltage");
+            System.out.println("\t\tPID Values:\n\t\t\tP: " + this.getP() + "\n\t\t\tI: " + this.getI() + "\n\t\t\tD: " + this.getD());
+            System.out.println("\t\tFirmware Version: " + this.getFirmwareVersion());
+            System.out.println("\t\tHardware Version: " + this.getHardwareVersion());
+            System.out.println("\t\tPosition Reference: " + this.getPositionReference().value +
+                    "\n\t\t\t" + CANJaguar.PositionReference.kNone.value + " -> kNone" +
+                    "\n\t\t\t" + CANJaguar.PositionReference.kQuadEncoder.value + " -> kQuadEncoder" +
+                    "\n\t\t\t" + CANJaguar.PositionReference.kPotentiometer.value + " -> kPotentiometer");
+            System.out.println("\t\tSpeed Reference: " + this.getSpeedReference().value +
+                    "\n\t\t\t" + CANJaguar.SpeedReference.kNone.value + " -> kNone" +
+                    "\n\t\t\t" + CANJaguar.SpeedReference.kEncoder.value + " -> kEncoder" +
+                    "\n\t\t\t" + CANJaguar.SpeedReference.kInvEncoder.value + " -> kInvEncoder" +
+                    "\n\t\t\t" + CANJaguar.SpeedReference.kQuadEncoder.value + " -> kQuadEncoder");
+            System.out.println("\t\tTemperature: " + this.getTemperature());
+            System.out.println("\t\tgetX() Value: " + this.getX());
+            System.out.println("\t\tisAlive() Value: " + this.isAlive());
+        } catch (CANTimeoutException ex) {
+            ex.printStackTrace();
+            System.out.println("Error using printSettings on Jaguar #" + ID);
+        }
     }
     
     private void setValue(double value) {
@@ -57,35 +96,35 @@ public class Jaguar extends CANJaguar {
     
     public void driveUsingVoltage(double voltage) {
 	// Voltage range is from -1.0 to 1.0
-        setControlMode(CANJaguar.ControlMode.kPercentVbus);
+        changeControlMode(CANJaguar.ControlMode.kPercentVbus);
         setValue(voltage);
     }
     
     public void driveUsingSpeed(double RPM) {
         // Speed unit is in RPMs
         // PIDS are REQUIRED in order to use this mode
-        setControlMode(CANJaguar.ControlMode.kSpeed);
+        changeControlMode(CANJaguar.ControlMode.kSpeed);
         setValue(RPM);
     }
     
     public void driveUsingPosition(double rotations) {
 	// Position unit is in rotations
         // PIDS are REQUIRED in order to use this mode
-        setControlMode(CANJaguar.ControlMode.kPosition);
+        changeControlMode(CANJaguar.ControlMode.kPosition);
         setValue(rotations);
     }
     
     public void driveUsingCurrent(double current) {
         // Current unit is in Amps
         // PIDS are REQUIRED in order to use this mode
-        setControlMode(CANJaguar.ControlMode.kCurrent);
+        changeControlMode(CANJaguar.ControlMode.kCurrent);
         setValue(current);
     }
     
-    public void setControlMode(CANJaguar.ControlMode mode) {
+    public void changeControlMode(CANJaguar.ControlMode mode) {
 	try {
 	    if(!this.getControlMode().equals(mode)) {
-		this.changeControlMode(mode);
+		super.changeControlMode(mode);
 		if(hasEncoder) configureJaguarWithEncoder();
                 else configureJaguar();
 	    }
