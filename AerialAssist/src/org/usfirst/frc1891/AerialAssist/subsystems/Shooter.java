@@ -38,9 +38,9 @@ public class Shooter extends Subsystem {
     5: winch can now be pulled back down (start back at #2 is in "ready to lock" position)
     */
     
-    private boolean isCalibrated = false, readyToShoot = false, shootRequested = false, motorOffSwitch = false, movingShooter = false, isDown = false;
+    private boolean isCalibrated = false, readyToFire = false, shootRequested = false, motorOffSwitch = false, movingShooter = false, isDown;
     private final int shootButton = 1, tiltButton = 2;
-    private final double minPotValue = 3.2, maxPotValue = 4.91, midPotValue = (minPotValue + maxPotValue) / 2, potTolerance = 0.75;
+    private final double minPotValue = 3.2, maxPotValue = 4.91, midPotValue = (minPotValue + maxPotValue) / 2, potTolerance = 0.05;
     private final double ANGLE_MOTOR_SPEED = 0.5;
     
     protected void initDefaultCommand() {}
@@ -48,7 +48,8 @@ public class Shooter extends Subsystem {
     public Shooter() {
          System.out.println("midPotValue:" + midPotValue);
          
-         
+         // Finding out what position the shooter is in
+         isDown = potentiometer.getValue() < midPotValue;
     }
     
     public void update() {
@@ -56,15 +57,12 @@ public class Shooter extends Subsystem {
         updateTilting();
     }
     
-    public void test() {
-        RobotMap.winchJags.test();
-    }
-    
     private void updateShooting() {
         // If shoot button is pressed and shooter is ready to shoot
-        if(readyToShoot) {
-            if(Robot.oi.joystickController1.isButtonDown(shootButton) || Robot.oi.joystickController2.isButtonDown(shootButton)) {
-                readyToShoot = false;
+        if(readyToFire && !movingShooter) {
+            // Must use BOTH joysticks to shoot
+            if(Robot.oi.joystickController1.isButtonDown(shootButton) && Robot.oi.joystickController2.isButtonDown(shootButton)) {
+                readyToFire = false;
                 shootRequested = true;
             }
             else shootMotor.set(0.0);
@@ -74,13 +72,43 @@ public class Shooter extends Subsystem {
             // Shoots the ball, and relocks the winch, if needed
             if(shootRequested) shootAndRelock();
             else {
-                System.out.println("loading code......");
-                //prepForShoot();
+                System.out.println("prepToFire() code......");
+                prepToFire();
             }
         }
     }
     
     private void updateTilting() {
+        
+        if(!movingShooter) {
+            if(Robot.oi.joystickController1.isButtonDown(tiltButton) || Robot.oi.joystickController2.isButtonDown(tiltButton)) {
+                movingShooter = true;
+            }
+        }
+        else { // Shooter is moving
+            if(isDown) { // Move it up
+                // If its in position
+                if(potentiometer.getValue() <= minPotValue + potTolerance) {
+                    angleMotor.set(0.0);
+                    isDown = false;
+                    movingShooter = false;
+                }
+                // Otherwise keep moving the motor
+                else angleMotor.set(ANGLE_MOTOR_SPEED);
+            }
+            else { // Move it down
+                // If its in position
+                if(potentiometer.getValue() >= maxPotValue - potTolerance) {
+                    angleMotor.set(0.0);
+                    isDown = true;
+                    movingShooter = false;
+                }
+                // Otherwise keep moving the motor
+                else angleMotor.set(-ANGLE_MOTOR_SPEED);
+            }
+        }
+        
+        
         
         
         
@@ -136,49 +164,11 @@ public class Shooter extends Subsystem {
         }
     }
     
-    public void prepForShoot() {
-        /*try {
-            // Callibrating the winch...
-            if(!loadSwitch.get() && !Winch.isLocked) {                 
-                // If it is away from the limit switch
-                if(MASTER_JAG.getPosition() > SLOW_POINT) {
-                    System.out.println("driving fast");
-                    this.driveUsingVoltage(SPEED);
-                }
-                else { // It is close to the limit switch
-                    System.out.println("driving slow");
-                    this.driveUsingVoltage(APPROACH_SPEED);
-                }
-            }
-            else {
-                // Setting locked to true, that way if it gets off the limit switch
-                // (Besides shooting) it will not try to lock again
-                isLocked = true;
-                
-                // Stopping everything
-                this.stop();
-                System.out.println("LOCKED IN PLACE!!!");
-                
-                // Putting a delay before the winch is driven the other way
-                if(!sleeped) {
-                    Thread.sleep(200);
-                    sleeped = true;
-                }
-                
-                // Unwinding the winch to put slack in the line
-                if(MASTER_JAG.getPosition() < 0.0) this.driveUsingVoltage(UNWIND_SPEED);
-                else {
-                    Robot.shooter.setCalibrated(true);
-                    Robot.shooter.setReadyToShoot(true);
-                    SmartDashboard.putBoolean("readytoshoot", true);
-                }
-            }
-        }
-        catch(CANTimeoutException e) {
-            e.printStackTrace();
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-        }*/
+    public void prepToFire() {
+        // So far the loading is the same as the calibrating,
+        // so we just call calibrate().... this might be
+        // changed later
+        RobotMap.winchJags.calibrate();
     }
     
     public void calibrate() {
@@ -192,7 +182,11 @@ public class Shooter extends Subsystem {
        isCalibrated = value;
     }
     
-     public void setReadyToShoot(boolean value) {
-       readyToShoot = value;
+    public void setReadyToFire(boolean value) {
+       readyToFire = value;
+    }
+    
+    public boolean isReadyToFire() {
+        return readyToFire;
     }
 }

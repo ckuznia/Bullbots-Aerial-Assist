@@ -89,7 +89,20 @@ public class Robot extends IterativeRobot {
         Scheduler.getInstance().run();
         //RobotMap.driveJags1.getMasterJag().setPID(0.5, 0, 0.002);
         
+        // remember use BOTH joysticks to shoot
+        
         RobotMap.driveJags1.driveUsingSpeed(Robot.oi.joystickController1.getYAxis() * MAX_RPM);
+        
+        
+        
+        // DONT MAKE SHOOTER TRY TO RELOAD DIRECTLY AFTER SHOOTING
+        
+        if(shooter.isReadyToFire()) {
+                
+        }
+        else shooter.prepToFire();
+        
+        
         
         
         /*int iterations = 55;        

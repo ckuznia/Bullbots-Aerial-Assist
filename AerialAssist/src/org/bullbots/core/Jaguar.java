@@ -43,11 +43,6 @@ public class Jaguar extends CANJaguar {
     
     public void printSettings() {
         try {
-            ControlMode originalMode = this.getControlMode();
-            // Switching to a mode that uses PIDs, otherwise the
-            // getP(), getI(), and getD() will all show up as 0. 
-            changeControlMode(CANJaguar.ControlMode.kSpeed);
-            
             // Showing information about the Jagaur's settings
             System.out.println("\nJagaur #" + ID + " Settings:");
             System.out.println("\t\tBus Voltage: " + this.getBusVoltage());
@@ -58,7 +53,18 @@ public class Jaguar extends CANJaguar {
                     "\n\t\t\t" + CANJaguar.ControlMode.kSpeed.value + " -> kSpeed" +
                     "\n\t\t\t" + CANJaguar.ControlMode.kPosition.value +" -> kPosition" +
                     "\n\t\t\t" + CANJaguar.ControlMode.kVoltage.value + " -> kVoltage");
+            
+            ControlMode originalMode = this.getControlMode();
+            
+            // Switching to a mode that uses PIDs, otherwise the
+            // getP(), getI(), and getD() will all show up as 0. 
+            changeControlMode(CANJaguar.ControlMode.kSpeed);
+            
             System.out.println("\t\tPID Values:\n\t\t\tP: " + this.getP() + "\n\t\t\tI: " + this.getI() + "\n\t\t\tD: " + this.getD());
+            
+            // Returning the Jaguar back to its original control mode
+            changeControlMode(originalMode);
+            
             System.out.println("\t\tFirmware Version: " + this.getFirmwareVersion());
             System.out.println("\t\tHardware Version: " + this.getHardwareVersion());
             System.out.println("\t\tPosition Reference: " + this.getPositionReference().value +
@@ -72,10 +78,8 @@ public class Jaguar extends CANJaguar {
                     "\n\t\t\t" + CANJaguar.SpeedReference.kQuadEncoder.value + " -> kQuadEncoder");
             System.out.println("\t\tTemperature: " + this.getTemperature());
             System.out.println("\t\tgetX() Value: " + this.getX());
-            System.out.println("\t\tisAlive() Value: " + this.isAlive());
+            System.out.println("\t\tisAlive() Value: " + this.isAlive());            
             
-            // Returning the Jaguar back to its original control mode
-            changeControlMode(originalMode);
         } catch (CANTimeoutException ex) {
             ex.printStackTrace();
             System.out.println("Error using printSettings on Jaguar #" + ID);

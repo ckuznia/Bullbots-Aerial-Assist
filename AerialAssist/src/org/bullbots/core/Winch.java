@@ -22,23 +22,10 @@ public class Winch extends DualJaguar {
         System.out.println("0 set");
     }
     
-    public void test() {
-        
-        try {
-            if(MASTER_JAG.getPosition() > -3.0) {
-                System.out.println("test was called!!! :)");
-                this.driveUsingVoltage(0.5);
-            }
-            else {
-                this.stop();
-            }
-        } catch (CANTimeoutException ex) {
-            ex.printStackTrace();
-        }
-    }
-    
     public void calibrate() {
         try {
+            Robot.shooter.setReadyToFire(false);
+            
             // Callibrating the winch...
             if(!RobotMap.shooterloadSwitch.get() && !isLocked) {
                 // If it is away from the limit switch
@@ -69,8 +56,7 @@ public class Winch extends DualJaguar {
                 // Unwinding the winch to put slack in the line
                 if(MASTER_JAG.getPosition() < 0.0) this.driveUsingVoltage(UNWIND_SPEED);
                 else {
-                    Robot.shooter.setCalibrated(true);
-                    Robot.shooter.setReadyToShoot(true);
+                    Robot.shooter.setReadyToFire(true);
                     SmartDashboard.putBoolean("readytoshoot", true);
                 }
             }
