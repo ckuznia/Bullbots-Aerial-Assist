@@ -43,6 +43,7 @@ public class Jaguar extends CANJaguar {
     
     public void printSettings() {
         try {
+            ControlMode originalMode = this.getControlMode();
             // Switching to a mode that uses PIDs, otherwise the
             // getP(), getI(), and getD() will all show up as 0. 
             changeControlMode(CANJaguar.ControlMode.kSpeed);
@@ -72,6 +73,9 @@ public class Jaguar extends CANJaguar {
             System.out.println("\t\tTemperature: " + this.getTemperature());
             System.out.println("\t\tgetX() Value: " + this.getX());
             System.out.println("\t\tisAlive() Value: " + this.isAlive());
+            
+            // Returning the Jaguar back to its original control mode
+            changeControlMode(originalMode);
         } catch (CANTimeoutException ex) {
             ex.printStackTrace();
             System.out.println("Error using printSettings on Jaguar #" + ID);
