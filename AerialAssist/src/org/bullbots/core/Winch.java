@@ -10,8 +10,8 @@ import org.usfirst.frc1891.AerialAssist.RobotMap;
  */
 public class Winch extends DualJaguar {
     
-    private final double SPEED = -0.5, APPROACH_SPEED = -0.35, UNWIND_SPEED = 0.5;
-    private final float SLOW_POINT = (float) -2.0; // -2.6
+    private final double SPEED = -1, APPROACH_SPEED = -0.35, UNWIND_SPEED = 1;
+    private final float SLOW_POINT = (float) -1.45; // -2.6
     
     public static boolean isLocked = false, sleeped = false;
     

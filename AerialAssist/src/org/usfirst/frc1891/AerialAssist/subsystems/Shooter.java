@@ -48,10 +48,13 @@ public class Shooter extends Subsystem {
          // Finding out what position the shooter is in
          isDown = potentiometer.getVoltage() > midPotValue;
          System.out.println("isDown = " + isDown + "\t potValue(): " + potentiometer.getVoltage());
+         
+         // It the winch is not ready to lock, get it ready to lock
+         if(!shootSwitch.get()) shootRequested = true;
     }
     
     public void update() {
-        //updateShooting();
+        updateShooting();
         updateTilting();
     }
     
@@ -165,8 +168,8 @@ public class Shooter extends Subsystem {
     private void shootAndRelock() {
         // Waiting until the lock is released (fired)
         if(!motorOffSwitch) {
-            if(shootSwitch.get()) shootMotor.set(1.0);
-            else motorOffSwitch = true;
+            shootMotor.set(1.0);
+            if(!shootSwitch.get()) motorOffSwitch = true;
         }
         // Now relocking the winch
         else if(shootSwitch.get()) {
