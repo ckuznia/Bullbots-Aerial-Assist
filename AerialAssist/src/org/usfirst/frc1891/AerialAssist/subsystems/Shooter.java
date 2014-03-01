@@ -37,8 +37,8 @@ public class Shooter extends Subsystem {
     
     private boolean isCalibrated = false, readyToFire = false, shootRequested = false, motorOffSwitch = false, movingShooter = false, isDown, hasShot = false;
     private final int shootButton = 1, tiltButton = 2;
-    private final double minPotValue = 3.2, maxPotValue = 4.91, midPotValue = (minPotValue + maxPotValue) / 2, potTolerance = 0.05;
-    private final double ANGLE_MOTOR_SPEED = 0.5;
+    private final double minPotValue = 3.01, maxPotValue = 4.73, midPotValue = (minPotValue + maxPotValue) / 2, potTolerance = 0.05;
+    private final double ANGLE_MOTOR_SPEED = 0.25;
     
     protected void initDefaultCommand() {}
     
@@ -46,11 +46,12 @@ public class Shooter extends Subsystem {
          System.out.println("midPotValue:" + midPotValue);
          
          // Finding out what position the shooter is in
-         isDown = potentiometer.getValue() < midPotValue;
+         isDown = potentiometer.getVoltage() > midPotValue;
+         System.out.println("isDown = " + isDown + "\t potValue(): " + potentiometer.getVoltage());
     }
     
     public void update() {
-        updateShooting();
+        //updateShooting();
         updateTilting();
     }
     
@@ -80,8 +81,7 @@ public class Shooter extends Subsystem {
         }
     }
     
-    private void updateTilting() {
-        
+    private void updateTilting() {        
         if(!movingShooter) {
             if(Robot.oi.joystickController1.isButtonDown(tiltButton) || Robot.oi.joystickController2.isButtonDown(tiltButton)) {
                 movingShooter = true;
@@ -90,23 +90,32 @@ public class Shooter extends Subsystem {
         else { // Shooter is moving
             if(isDown) { // Move it up
                 // If its in position
-                if(potentiometer.getValue() <= minPotValue + potTolerance) {
+                System.out.println("getValue(): " + potentiometer.getVoltage() + " " + minPotValue + potTolerance);
+                if(potentiometer.getVoltage() <= minPotValue + potTolerance) {
                     angleMotor.set(0.0);
                     isDown = false;
                     movingShooter = false;
+                    System.out.println("in up pos");
                 }
                 // Otherwise keep moving the motor
-                else angleMotor.set(ANGLE_MOTOR_SPEED);
+                else {
+                    System.out.println("Moving UP");
+                    angleMotor.set(-ANGLE_MOTOR_SPEED);
+                }
             }
             else { // Move it down
                 // If its in position
-                if(potentiometer.getValue() >= maxPotValue - potTolerance) {
+                if(potentiometer.getVoltage() >= maxPotValue - potTolerance) {
                     angleMotor.set(0.0);
                     isDown = true;
                     movingShooter = false;
+                    System.out.println("in down pos");
                 }
                 // Otherwise keep moving the motor
-                else angleMotor.set(-ANGLE_MOTOR_SPEED);
+                else {
+                    System.out.println("Moving DOWN");
+                    angleMotor.set(ANGLE_MOTOR_SPEED);
+                }
             }
         }
         
