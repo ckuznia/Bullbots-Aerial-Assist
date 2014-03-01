@@ -8,10 +8,7 @@
 // update. Deleting the comments indicating the section will prevent
 // it from being updated in the future.
 package org.usfirst.frc1891.AerialAssist.subsystems;
-import edu.wpi.first.wpilibj.CANJaguar;
 import org.usfirst.frc1891.AerialAssist.RobotMap;
-import org.usfirst.frc1891.AerialAssist.commands.*;
-import edu.wpi.first.wpilibj.command.Subsystem;
 /**
  *
  */

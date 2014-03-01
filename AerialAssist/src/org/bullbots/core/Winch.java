@@ -1,8 +1,6 @@
 package org.bullbots.core;
 
-import edu.wpi.first.wpilibj.CANJaguar;
 import edu.wpi.first.wpilibj.can.CANTimeoutException;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.usfirst.frc1891.AerialAssist.Robot;
 import org.usfirst.frc1891.AerialAssist.RobotMap;
 
@@ -19,7 +17,6 @@ public class Winch extends DualJaguar {
     
     public Winch(int MASTER_ID, int SLAVE_ID, double P, double I, double D) {
         super(MASTER_ID, SLAVE_ID, P, I, D);
-        System.out.println("0 set");
     }
     
     public void calibrate() {
@@ -57,7 +54,7 @@ public class Winch extends DualJaguar {
                 if(MASTER_JAG.getPosition() < 0.0) this.driveUsingVoltage(UNWIND_SPEED);
                 else {
                     Robot.shooter.setReadyToFire(true);
-                    SmartDashboard.putBoolean("readytoshoot", true);
+                    System.out.println("Ready to fire...");
                 }
             }
         }

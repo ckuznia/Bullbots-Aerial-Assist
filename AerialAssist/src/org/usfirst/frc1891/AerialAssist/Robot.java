@@ -9,8 +9,6 @@
 // it from being updated in the future.
 package org.usfirst.frc1891.AerialAssist;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.can.CANTimeoutException;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -79,9 +77,7 @@ public class Robot extends IterativeRobot {
         // this line or comment it out.
         if (autonomousCommand != null) autonomousCommand.cancel();
     }
-    
-    int x = 0;
-    
+        
     /**
      * This function is called periodically during operator control
      */
@@ -89,18 +85,15 @@ public class Robot extends IterativeRobot {
         Scheduler.getInstance().run();
         //RobotMap.driveJags1.getMasterJag().setPID(0.5, 0, 0.002);
         
+        //RobotMap.driveJags1.driveUsingSpeed(Robot.oi.joystickController1.getYAxis() * MAX_RPM);
+        driveTrain.driveUsingSpeed(Robot.oi.joystickController1.getYAxis() * MAX_RPM, -Robot.oi.joystickController2.getYAxis() * MAX_RPM);
+        
         // remember use BOTH joysticks to shoot
-        
-        RobotMap.driveJags1.driveUsingSpeed(Robot.oi.joystickController1.getYAxis() * MAX_RPM);
-        
+        shooter.update();
         
         
         // DONT MAKE SHOOTER TRY TO RELOAD DIRECTLY AFTER SHOOTING
         
-        if(shooter.isReadyToFire()) {
-                
-        }
-        else shooter.prepToFire();
         
         
         
@@ -143,10 +136,10 @@ public class Robot extends IterativeRobot {
     public void testPeriodic() {
         LiveWindow.run();
         
-        //RobotMap.winchJags.showPosition();
+        RobotMap.winchJags.showPosition();
         
         // Continually driving the motors to the setpoint configured in the LiveWindow
-        driveTrain.driveUsingSpeed(RobotMap.driveJags1.setPoint, RobotMap.driveJags2.setPoint);
+        //driveTrain.driveUsingSpeed(RobotMap.driveJags1.setPoint, RobotMap.driveJags2.setPoint);
     }
     public void testInit() {
          LiveWindow.setEnabled(true);

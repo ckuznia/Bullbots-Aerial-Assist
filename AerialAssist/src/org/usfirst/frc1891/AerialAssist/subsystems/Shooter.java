@@ -10,10 +10,7 @@
 package org.usfirst.frc1891.AerialAssist.subsystems;
 import org.usfirst.frc1891.AerialAssist.RobotMap;
 import edu.wpi.first.wpilibj.*;
-import edu.wpi.first.wpilibj.can.CANTimeoutException;
 import edu.wpi.first.wpilibj.command.Subsystem;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import org.bullbots.core.Winch;
 import org.usfirst.frc1891.AerialAssist.Robot;
 /**
  *
@@ -38,7 +35,7 @@ public class Shooter extends Subsystem {
     5: winch can now be pulled back down (start back at #2 is in "ready to lock" position)
     */
     
-    private boolean isCalibrated = false, readyToFire = false, shootRequested = false, motorOffSwitch = false, movingShooter = false, isDown;
+    private boolean isCalibrated = false, readyToFire = false, shootRequested = false, motorOffSwitch = false, movingShooter = false, isDown, hasShot = false;
     private final int shootButton = 1, tiltButton = 2;
     private final double minPotValue = 3.2, maxPotValue = 4.91, midPotValue = (minPotValue + maxPotValue) / 2, potTolerance = 0.05;
     private final double ANGLE_MOTOR_SPEED = 0.5;
@@ -64,6 +61,8 @@ public class Shooter extends Subsystem {
             if(Robot.oi.joystickController1.isButtonDown(shootButton) && Robot.oi.joystickController2.isButtonDown(shootButton)) {
                 readyToFire = false;
                 shootRequested = true;
+                
+                hasShot = true;
             }
             else shootMotor.set(0.0);
         }
@@ -73,7 +72,10 @@ public class Shooter extends Subsystem {
             if(shootRequested) shootAndRelock();
             else {
                 System.out.println("prepToFire() code......");
-                prepToFire();
+                
+                // The check below is to make sure the robot does not load
+                // instantly after shooting
+                if(!hasShot) prepToFire();
             }
         }
     }

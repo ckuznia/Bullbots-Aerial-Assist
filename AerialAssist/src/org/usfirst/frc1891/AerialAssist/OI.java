@@ -9,9 +9,7 @@
 // it from being updated in the future.
 package org.usfirst.frc1891.AerialAssist;
 import edu.wpi.first.wpilibj.*;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.bullbots.core.JoystickController;
-import org.usfirst.frc1891.AerialAssist.commands.AutonomousCommand;
 /**
  * This class is the glue that binds the controls on the physical operator
  * interface to the commands and command groups that allow control of the robot.
