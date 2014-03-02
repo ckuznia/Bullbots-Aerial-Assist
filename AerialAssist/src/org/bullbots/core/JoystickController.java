@@ -17,14 +17,12 @@ public class JoystickController {
     
     public double getXAxis(){
 	double value = JOYSTICK.getRawAxis(1);
-	if(Math.abs(value) > DEADBAND) return value;
-	return 0;
+	return (Math.abs(value) > DEADBAND ? value : 0);
     }
     
     public double getYAxis(){
 	double value = JOYSTICK.getRawAxis(2);
-	if(Math.abs(value) > DEADBAND) return value;
-	return 0;
+	return (Math.abs(value) > DEADBAND ? value : 0);
     }
     
     public boolean isButtonDown(int button){

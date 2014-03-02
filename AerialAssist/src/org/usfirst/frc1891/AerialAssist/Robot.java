@@ -30,7 +30,7 @@ public class Robot extends IterativeRobot {
     
     public static DriveTrain driveTrain;
     
-    public static final double MAX_RPM = 240.0; // 120 RPMs = ~4 FPS
+    public static final double MAX_RPM = 240.0; // 120 RPMs = ~4 Feet/Second
         
     /**
      * This function is run when the robot is first started up and should be
@@ -71,12 +71,14 @@ public class Robot extends IterativeRobot {
         // schedule the autonomous command (example)
         if (autonomousCommand != null) autonomousCommand.start();
     }
+    
     /**
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
         Scheduler.getInstance().run();
     }
+    
     public void teleopInit() {
 	// This makes sure that the autonomous stops running when
         // teleop starts running. If you want the autonomous to 
@@ -90,53 +92,13 @@ public class Robot extends IterativeRobot {
      */
     public void teleopPeriodic() {
         Scheduler.getInstance().run();
-        //RobotMap.driveJags1.getMasterJag().setPID(0.5, 0, 0.002);
         
-        //RobotMap.driveJags1.driveUsingSpeed(Robot.oi.joystickController1.getYAxis() * MAX_RPM);
         driveTrain.driveUsingSpeed(Robot.oi.joystickController1.getYAxis() * MAX_RPM, -Robot.oi.joystickController2.getYAxis() * MAX_RPM);
         
         // remember use BOTH joysticks to shoot
         shooter.update();
-        
-        
-        // DONT MAKE SHOOTER TRY TO RELOAD DIRECTLY AFTER SHOOTING
-        
-        
-        
-        
-        
-        /*int iterations = 55;        
-        if(x == 0) {
-            System.out.println("\t\tspeed " + x);
-            RobotMap.driveJags1.driveUsingSpeed(60);
-        }
-        else if (x == iterations){
-            System.out.println("\t\tvoltage " + x);
-            RobotMap.driveJags1.driveUsingVoltage(0.45);
-        }
-        else if (x == iterations * 2){
-            System.out.println("\t\tposition " + x);
-            RobotMap.driveJags1.driveUsingPosition(60);
-        }
-        else if (x == iterations * 3){
-            System.out.println("\t\tcurrent " + x);
-            RobotMap.driveJags1.driveUsingCurrent(110);
-        }
-        else if(x == iterations * 4) {
-            RobotMap.driveJags1.stop();
-       }
-       x++;*/
-        
-        
-        
-        //if(!shooter.isCalibrated()) ;//Robot.shooter.calibrate();
-        //else {
-            //shooter.update();
-            // Driving with joysticks
-            //shooter.test();
-            //driveTrain.driveUsingSpeed(Robot.oi.joystickController1.getYAxis() * Robot.MAX_RPM, -Robot.oi.joystickController2.getYAxis() * Robot.MAX_RPM);
-        //}
     }
+    
     /**
      * This function called periodically during test mode
      */
@@ -148,6 +110,7 @@ public class Robot extends IterativeRobot {
         // Continually driving the motors to the setpoint configured in the LiveWindow
         //driveTrain.driveUsingSpeed(RobotMap.driveJags1.setPoint, RobotMap.driveJags2.setPoint);
     }
+    
     public void testInit() {
          LiveWindow.setEnabled(true);
     }

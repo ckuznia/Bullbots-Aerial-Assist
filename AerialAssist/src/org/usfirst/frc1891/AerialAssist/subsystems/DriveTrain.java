@@ -46,7 +46,7 @@ public class DriveTrain {
         RobotMap.driveJags2.driveUsingCurrent(rightValue);
     }
     
-    public void stopDriving() {
+    public void stop() {
        RobotMap.driveJags1.stop();
        RobotMap.driveJags2.stop();
     }

@@ -208,7 +208,7 @@ public class Jaguar extends CANJaguar {
         driveUsingVoltage(0.0);
     }
     
-    public double roundValue(double value) {
+    public static double roundValue(double value) {
         return (double) (int) ((value + 0.005) * 100) / 100;
     }
 }

@@ -32,8 +32,8 @@ public class DualJaguar implements LiveWindowSendable {
     public void driveUsingSpeed(double RPM) {
 	try {
             // Rounding values to 2 decimal places, in order not to overload the cRIO
-            double roundedSetValue = MASTER_JAG.roundValue(RPM);
-            double roundedGetValue = MASTER_JAG.roundValue(MASTER_JAG.getSpeed());            
+            double roundedSetValue = Jaguar.roundValue(RPM);
+            double roundedGetValue = Jaguar.roundValue(MASTER_JAG.getSpeed());            
             
             // Updating the speed of the master jag
             if(roundedGetValue != roundedSetValue) MASTER_JAG.driveUsingSpeed(roundedSetValue);
@@ -52,8 +52,8 @@ public class DualJaguar implements LiveWindowSendable {
     public void driveUsingCurrent(double current) {
         try {
             // Rounding values to 2 decimal places, in order not to overload the cRIO
-            double roundedSetValue = MASTER_JAG.roundValue(current);
-            double roundedGetValue = MASTER_JAG.roundValue(MASTER_JAG.getOutputCurrent());
+            double roundedSetValue = Jaguar.roundValue(current);
+            double roundedGetValue = Jaguar.roundValue(MASTER_JAG.getOutputCurrent());
             
             // Updating the speed of the master jag
             if(roundedGetValue != roundedSetValue) MASTER_JAG.driveUsingCurrent(roundedSetValue);
@@ -66,8 +66,12 @@ public class DualJaguar implements LiveWindowSendable {
     
     private void matchSlaveWithMaster() {
         try {
+            // Rounding values to 2 decimal places, in order not to overload the cRIO
+            double roundedSlaveVoltage = Jaguar.roundValue(SLAVE_JAG.getOutputVoltage());
+            double roundedMasterVoltage = Jaguar.roundValue(MASTER_JAG.getOutputVoltage());
+            
             // If the slave's voltage value does not match the master's, then update the slave's voltage value to the master's
-            if(SLAVE_JAG.getOutputVoltage()!= MASTER_JAG.getOutputVoltage()) {
+            if(roundedSlaveVoltage != roundedMasterVoltage) {
                 SLAVE_JAG.driveUsingVoltage(MASTER_JAG.getOutputVoltage() / MASTER_JAG.getBusVoltage());
             }
         }
@@ -102,7 +106,6 @@ public class DualJaguar implements LiveWindowSendable {
     
    
     public void initTable(ITable table) {
-        System.out.println("initTable() called");
         if(this.table!=null) this.table.removeTableListener(listener);
         this.table = table;
         if(table!=null) {
@@ -127,12 +130,8 @@ public class DualJaguar implements LiveWindowSendable {
     public void updateTable() {}
     
     public void startLiveWindowMode() {
-        try {
-            // Disabling the jags for safety
-            MASTER_JAG.disableControl();
-        } catch (CANTimeoutException e) {
-            e.printStackTrace();
-        }
+        // Stopping the jags for safety
+        stop();
     }
     
     public void stopLiveWindowMode() {}

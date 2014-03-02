@@ -8,9 +8,12 @@
 // update. Deleting the comments indicating the section will prevent
 // it from being updated in the future.
 package org.usfirst.frc1891.AerialAssist.subsystems;
+import edu.wpi.first.wpilibj.AnalogChannel;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.SpeedController;
 import org.usfirst.frc1891.AerialAssist.RobotMap;
-import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import org.bullbots.core.Jaguar;
 import org.usfirst.frc1891.AerialAssist.Robot;
 /**
  *
@@ -43,13 +46,11 @@ public class Shooter extends Subsystem {
     protected void initDefaultCommand() {}
     
     public Shooter() {
-         System.out.println("midPotValue:" + midPotValue);
-         
          // Finding out what position the shooter is in
          isDown = potentiometer.getVoltage() > midPotValue;
-         System.out.println("isDown = " + isDown + "\t potValue(): " + potentiometer.getVoltage());
          
-         // It the winch is not ready to lock, get it ready to lock
+         // If the winch is not ready to lock, get it ready to lock
+         // (requesting a shoot will force the motor to lock the winch)
          if(!shootSwitch.get()) shootRequested = true;
     }
     
@@ -59,113 +60,66 @@ public class Shooter extends Subsystem {
     }
     
     private void updateShooting() {
-        // If shoot button is pressed and shooter is ready to shoot
+        // If shooter is not tilting and shooter is ready to shoot
         if(readyToFire && !movingShooter) {
             // Must use BOTH joysticks to shoot
             if(Robot.oi.joystickController1.isButtonDown(shootButton) && Robot.oi.joystickController2.isButtonDown(shootButton)) {
                 readyToFire = false;
                 shootRequested = true;
                 
+                // This will be removed later...
                 hasShot = true;
             }
             else shootMotor.set(0.0);
         }
-        // Winch lock has been released and needs to be relocked
+        // Shooter is not ready to fire or the shooter is tilting
         else {
-            // Shoots the ball, and relocks the winch, if needed
-            if(shootRequested) shootAndRelock();
+            // If needed, shoots the ball and locks the winch
+            if(shootRequested) fireAndLock();
             else {
-                System.out.println("prepToFire() code......");
-                
                 // The check below is to make sure the robot does not load
-                // instantly after shooting
+                // instantly after shooting, this will be removed later...
                 if(!hasShot) prepToFire();
             }
         }
     }
     
-    private void updateTilting() {        
+    private void updateTilting() {
         if(!movingShooter) {
             if(Robot.oi.joystickController1.isButtonDown(tiltButton) || Robot.oi.joystickController2.isButtonDown(tiltButton)) {
                 movingShooter = true;
             }
         }
         else { // Shooter is moving
+            
+            // Rounding value to 2 decimal places in order
+            // not to overload the cRIO
+            double roundedPotVoltage = Jaguar.roundValue(potentiometer.getVoltage());
+            
             if(isDown) { // Move it up
                 // If its in position
-                System.out.println("getValue(): " + potentiometer.getVoltage() + " " + minPotValue + potTolerance);
-                if(potentiometer.getVoltage() <= minPotValue + potTolerance) {
+                if(roundedPotVoltage <= minPotValue + potTolerance) {
                     angleMotor.set(0.0);
                     isDown = false;
                     movingShooter = false;
-                    System.out.println("in up pos");
                 }
                 // Otherwise keep moving the motor
-                else {
-                    System.out.println("Moving UP");
-                    angleMotor.set(-ANGLE_MOTOR_SPEED);
-                }
+                else angleMotor.set(-ANGLE_MOTOR_SPEED);
             }
             else { // Move it down
                 // If its in position
-                if(potentiometer.getVoltage() >= maxPotValue - potTolerance) {
+                if(roundedPotVoltage >= maxPotValue - potTolerance) {
                     angleMotor.set(0.0);
                     isDown = true;
                     movingShooter = false;
-                    System.out.println("in down pos");
                 }
                 // Otherwise keep moving the motor
-                else {
-                    System.out.println("Moving DOWN");
-                    angleMotor.set(ANGLE_MOTOR_SPEED);
-                }
+                else angleMotor.set(ANGLE_MOTOR_SPEED);
             }
         }
-        
-        
-        
-        
-        
-        // OLD
-        
-        // Updating tilt
-        /*if(!tiltRequested) {
-            isDown = (potentiometer.getValue() < midPotValue);
-        }
-        
-        System.out.println("isDown: " + isDown);
-        
-        // Checking for a tilt request
-        if(Robot.oi.joystickController1.isButtonDown(tiltButton) || Robot.oi.joystickController2.isButtonDown(tiltButton)) {
-             tiltRequested = true;
-        }
-        
-        // Updating the tilt if there was a tilt request
-        if(tiltRequested) {
-            System.out.println("Tilt requested...");
-            if(isDown) {
-                // Tilting up
-                if(potentiometer.getValue() <= maxPotValue * potTolerance) angleMotor.set(ANGLE_MOTOR_SPEED);
-                else {
-                    System.out.println("done tilting up");
-                    angleMotor.set(0.0);
-                    tiltRequested = false;
-                }
-            }
-            else {
-                // Tilting down
-                if(potentiometer.getValue() >= minPotValue * 1.25) angleMotor.set(-ANGLE_MOTOR_SPEED);
-                else {
-                    System.out.println("done tilting down");
-                    angleMotor.set(0.0);
-                    tiltRequested = false;
-                }
-            }
-        }
-        */
     }
     
-    private void shootAndRelock() {
+    private void fireAndLock() {
         // Waiting until the lock is released (fired)
         if(!motorOffSwitch) {
             shootMotor.set(1.0);
@@ -180,8 +134,8 @@ public class Shooter extends Subsystem {
     
     public void prepToFire() {
         // So far the loading is the same as the calibrating,
-        // so we just call calibrate().... this might be
-        // changed later
+        // so we just call calibrate() in order to load...
+        // this might be changed later
         RobotMap.winchJags.calibrate();
     }
     
@@ -196,11 +150,11 @@ public class Shooter extends Subsystem {
        isCalibrated = value;
     }
     
-    public void setReadyToFire(boolean value) {
-       readyToFire = value;
-    }
-    
     public boolean isReadyToFire() {
         return readyToFire;
+    }
+    
+    public void setReadyToFire(boolean value) {
+       readyToFire = value;
     }
 }
