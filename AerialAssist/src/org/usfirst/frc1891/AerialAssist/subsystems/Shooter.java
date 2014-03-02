@@ -11,10 +11,12 @@ package org.usfirst.frc1891.AerialAssist.subsystems;
 import edu.wpi.first.wpilibj.AnalogChannel;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.SpeedController;
+import edu.wpi.first.wpilibj.can.CANTimeoutException;
 import org.usfirst.frc1891.AerialAssist.RobotMap;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import org.bullbots.core.Jaguar;
 import org.usfirst.frc1891.AerialAssist.Robot;
+
 /**
  *
  */
@@ -38,20 +40,43 @@ public class Shooter extends Subsystem {
     5: winch can now be pulled back down (start back at #2 is in "ready to lock" position)
     */
     
-    private boolean isCalibrated = false, readyToFire = false, shootRequested = false, motorOffSwitch = false, movingShooter = false, isDown, hasShot = false;
-    private final int shootButton = 1, tiltButton = 2;
-    private final double minPotValue = 3.01, maxPotValue = 4.73, midPotValue = (minPotValue + maxPotValue) / 2, potTolerance = 0.05;
+    private boolean 
+            isCalibrated = false, 
+            readyToFire = false, 
+            shootRequested = false, 
+            motorOffSwitch = false, 
+            movingShooter = false, 
+            isDown,
+            readyToLoad,
+            waited = false,
+            firstTime = true;
+    private final int 
+            SHOOT_BUTTON = 1, 
+            TILT_BUTTON = 2,
+            LOADING_DELAY = 3000;
+    private final double 
+            minPotValue = 3.01, 
+            maxPotValue = 4.73, 
+            midPotValue = (minPotValue + maxPotValue) / 2, 
+            potTolerance = 0.05,
+            positionTolerance = -0.05;
     private final double ANGLE_MOTOR_SPEED = 0.25;
     
     protected void initDefaultCommand() {}
     
     public Shooter() {
-         // Finding out what position the shooter is in
-         isDown = potentiometer.getVoltage() > midPotValue;
+        // Finding out what position the shooter is in
+        isDown = potentiometer.getVoltage() > midPotValue;
          
-         // If the winch is not ready to lock, get it ready to lock
-         // (requesting a shoot will force the motor to lock the winch)
-         if(!shootSwitch.get()) shootRequested = true;
+        // If the winch is not ready to lock, get it ready to lock
+        // (requesting a shoot will force the motor to lock the winch)
+        if(!shootSwitch.get()) shootRequested = true;
+        try {
+            // Checking to make sure the shooter is ready to load
+            readyToLoad = RobotMap.winchJags.getMasterJag().getPosition() >= positionTolerance;
+        } catch (CANTimeoutException ex) {
+            ex.printStackTrace();
+        }
     }
     
     public void update() {
@@ -63,30 +88,36 @@ public class Shooter extends Subsystem {
         // If shooter is not tilting and shooter is ready to shoot
         if(readyToFire && !movingShooter) {
             // Must use BOTH joysticks to shoot
-            if(Robot.oi.joystickController1.isButtonDown(shootButton) && Robot.oi.joystickController2.isButtonDown(shootButton)) {
+            if(Robot.oi.joystickController1.isButtonDown(SHOOT_BUTTON) && Robot.oi.joystickController2.isButtonDown(SHOOT_BUTTON)) {
                 readyToFire = false;
                 shootRequested = true;
-                
-                // This will be removed later...
-                hasShot = true;
             }
-            else shootMotor.set(0.0);
         }
         // Shooter is not ready to fire or the shooter is tilting
         else {
             // If needed, shoots the ball and locks the winch
             if(shootRequested) fireAndLock();
+            // Otherwise, if we are not loading for the first time,
+            // and we have not delayed loading yet, delay for some
+            // time before loading
+            else if(!waited && !firstTime) {
+                firstTime = false;
+                waited = true;
+                try {
+                    Thread.sleep(LOADING_DELAY);
+                }
+                catch(InterruptedException e){}
+            }
             else {
-                // The check below is to make sure the robot does not load
-                // instantly after shooting, this will be removed later...
-                if(!hasShot) prepToFire();
+                // If ready to load, load
+                if(readyToLoad) prepToFire();
             }
         }
     }
     
     private void updateTilting() {
         if(!movingShooter) {
-            if(Robot.oi.joystickController1.isButtonDown(tiltButton) || Robot.oi.joystickController2.isButtonDown(tiltButton)) {
+            if(Robot.oi.joystickController1.isButtonDown(TILT_BUTTON) || Robot.oi.joystickController2.isButtonDown(TILT_BUTTON)) {
                 movingShooter = true;
             }
         }
@@ -156,5 +187,13 @@ public class Shooter extends Subsystem {
     
     public void setReadyToFire(boolean value) {
        readyToFire = value;
+    }
+    
+    public void setReadyToLoad(boolean value) {
+        readyToLoad = value;
+    }
+    
+    public void setWaited(boolean value) {
+        waited = value;
     }
 }

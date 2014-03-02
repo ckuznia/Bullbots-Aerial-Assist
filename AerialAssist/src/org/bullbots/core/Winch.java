@@ -54,7 +54,11 @@ public class Winch extends DualJaguar {
                 
                 // Unwinding the winch, once finished, then shooter is ready to fire
                 if(roundedPosition < 0.0) this.driveUsingVoltage(UNWIND_SPEED);
-                else Robot.shooter.setReadyToFire(true);
+                else {
+                    Robot.shooter.setReadyToFire(true);
+                    Robot.shooter.setReadyToLoad(false);
+                    Robot.shooter.setWaited(false);
+                }
             }
         }
         catch(CANTimeoutException e) {
