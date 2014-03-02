@@ -42,18 +42,18 @@ public class Shooter extends Subsystem {
     
     private boolean 
             isCalibrated = false, 
-            readyToFire = false, 
-            shootRequested = false, 
-            motorOffSwitch = false, 
-            movingShooter = false, 
+            isLoaded = false, 
+            isShooting = false,
+            isLoading = false,
+            winchLocked = false,
+            tiltingShooter = false, 
             isDown,
-            readyToLoad,
             waited = false,
-            firstTime = true;
+            fired = false;
     private final int 
             SHOOT_BUTTON = 1, 
             TILT_BUTTON = 2,
-            LOADING_DELAY = 3000;
+            POST_SHOOT_DELAY = 3000;
     private final double 
             minPotValue = 3.01, 
             maxPotValue = 4.73, 
@@ -65,18 +65,7 @@ public class Shooter extends Subsystem {
     protected void initDefaultCommand() {}
     
     public Shooter() {
-        // Finding out what position the shooter is in
         isDown = potentiometer.getVoltage() > midPotValue;
-         
-        // If the winch is not ready to lock, get it ready to lock
-        // (requesting a shoot will force the motor to lock the winch)
-        if(!shootSwitch.get()) shootRequested = true;
-        try {
-            // Checking to make sure the shooter is ready to load
-            readyToLoad = RobotMap.winchJags.getMasterJag().getPosition() >= positionTolerance;
-        } catch (CANTimeoutException ex) {
-            ex.printStackTrace();
-        }
     }
     
     public void update() {
@@ -85,40 +74,56 @@ public class Shooter extends Subsystem {
     }
     
     private void updateShooting() {
-        // If shooter is not tilting and shooter is ready to shoot
-        if(readyToFire && !movingShooter) {
-            // Must use BOTH joysticks to shoot
-            if(Robot.oi.joystickController1.isButtonDown(SHOOT_BUTTON) && Robot.oi.joystickController2.isButtonDown(SHOOT_BUTTON)) {
-                readyToFire = false;
-                shootRequested = true;
-            }
-        }
-        // Shooter is not ready to fire or the shooter is tilting
-        else {
-            // If needed, shoots the ball and locks the winch
-            if(shootRequested) fireAndLock();
-            // Otherwise, if we are not loading for the first time,
-            // and we have not delayed loading yet, delay for some
-            // time before loading
-            else if(!waited && !firstTime) {
-                firstTime = false;
-                waited = true;
-                try {
-                    Thread.sleep(LOADING_DELAY);
+        try {
+            // Shooter is loaded and ready to fire
+            if(isLoaded) {
+                System.out.println("LOADED");
+                // Must use BOTH joysticks to shoot, only active when shooter is not tilting
+                if(!tiltingShooter && 
+                        Robot.oi.joystickController1.isButtonDown(SHOOT_BUTTON) && 
+                        Robot.oi.joystickController2.isButtonDown(SHOOT_BUTTON)) {
+                    isLoaded = false;
+                    isShooting = true;
                 }
-                catch(InterruptedException e){}
             }
+            // Shooter is in the middle of the shooting process
+            else if(isShooting) {
+                System.out.println("SHOOTING");
+                // Shooting, then locking the winch
+                fireAndLock();
+                
+                if(!waited) {
+                    // Checking if the shooter position is back at 0
+                    if(RobotMap.winchJags.getMasterJag().getPosition() >= positionTolerance) {
+                        Thread.sleep(POST_SHOOT_DELAY);
+                        waited = true;
+                    }
+                }
+                // If the delay was implemented, and the winch is locked,
+                // then its done shooting
+                else if(winchLocked) isShooting = waited = false;
+            }
+            // Shooter is loading
+            else if(isLoading) {
+                System.out.println("LOADING");
+                load();
+            }
+            // Shooter is ready to load (idle)
             else {
-                // If ready to load, load
-                if(readyToLoad) prepToFire();
+                System.out.println("READY TO LOAD");
+                load();
             }
+        } catch(CANTimeoutException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
     
     private void updateTilting() {
-        if(!movingShooter) {
+        if(!tiltingShooter) { // Awaiting a request to tilt
             if(Robot.oi.joystickController1.isButtonDown(TILT_BUTTON) || Robot.oi.joystickController2.isButtonDown(TILT_BUTTON)) {
-                movingShooter = true;
+                tiltingShooter = true;
             }
         }
         else { // Shooter is moving
@@ -132,7 +137,7 @@ public class Shooter extends Subsystem {
                 if(roundedPotVoltage <= minPotValue + potTolerance) {
                     angleMotor.set(0.0);
                     isDown = false;
-                    movingShooter = false;
+                    tiltingShooter = false;
                 }
                 // Otherwise keep moving the motor
                 else angleMotor.set(-ANGLE_MOTOR_SPEED);
@@ -142,7 +147,7 @@ public class Shooter extends Subsystem {
                 if(roundedPotVoltage >= maxPotValue - potTolerance) {
                     angleMotor.set(0.0);
                     isDown = true;
-                    movingShooter = false;
+                    tiltingShooter = false;
                 }
                 // Otherwise keep moving the motor
                 else angleMotor.set(ANGLE_MOTOR_SPEED);
@@ -150,20 +155,23 @@ public class Shooter extends Subsystem {
         }
     }
     
-    private void fireAndLock() {
+    public void fireAndLock() {
+        shootMotor.set(1.0);
+        winchLocked = false;
+        
         // Waiting until the lock is released (fired)
-        if(!motorOffSwitch) {
-            shootMotor.set(1.0);
-            if(!shootSwitch.get()) motorOffSwitch = true;
-        }
-        // Now relocking the winch
+        if(!fired) fired = !shootSwitch.get();
+        
+        // Now waiting until the motor is back on the
+        // switch, then stopping the motor (locked)
         else if(shootSwitch.get()) {
             shootMotor.set(0.0);
-            shootRequested = false;
+            winchLocked = true;
+            fired = false;
         }
     }
     
-    public void prepToFire() {
+    public void load() {
         // So far the loading is the same as the calibrating,
         // so we just call calibrate() in order to load...
         // this might be changed later
@@ -173,27 +181,32 @@ public class Shooter extends Subsystem {
     public void calibrate() {
         RobotMap.winchJags.calibrate();
     }
+    
     public boolean isCalibrated() {
         return isCalibrated;
+    }
+    
+    public boolean isLoaded() {
+        return isLoaded;
+    }
+    
+    public boolean winchLocked() {
+        return winchLocked;
     }
     
     public void setCalibrated(boolean value) {
        isCalibrated = value;
     }
     
-    public boolean isReadyToFire() {
-        return readyToFire;
-    }
-    
-    public void setReadyToFire(boolean value) {
-       readyToFire = value;
-    }
-    
-    public void setReadyToLoad(boolean value) {
-        readyToLoad = value;
+    public void setLoaded(boolean value) {
+       isLoaded = value;
     }
     
     public void setWaited(boolean value) {
         waited = value;
+    }
+    
+    public void setLoading(boolean value) {
+        isLoading = value;
     }
 }

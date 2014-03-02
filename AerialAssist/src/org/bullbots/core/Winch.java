@@ -25,11 +25,17 @@ public class Winch extends DualJaguar {
     
     public void calibrate() {
         try {
-            Robot.shooter.setReadyToFire(false);
+            Robot.shooter.setLoaded(false);
+            Robot.shooter.setLoading(true);
             
             // Rounding the position value to 2 decimal places, that 
             // way we are not checking a lot of floating point values
             double roundedPosition = Jaguar.roundValue(MASTER_JAG.getPosition());
+            
+            // Making sure the winch is ready to lock
+            if(!Robot.shooter.winchLocked()) {
+                Robot.shooter.fireAndLock();
+            }
             
             // Callibrating the winch...
             if(!RobotMap.shooterloadSwitch.get() && !isLocked) {
@@ -55,9 +61,8 @@ public class Winch extends DualJaguar {
                 // Unwinding the winch, once finished, then shooter is ready to fire
                 if(roundedPosition < 0.0) this.driveUsingVoltage(UNWIND_SPEED);
                 else {
-                    Robot.shooter.setReadyToFire(true);
-                    Robot.shooter.setReadyToLoad(false);
-                    Robot.shooter.setWaited(false);
+                    Robot.shooter.setLoaded(true);
+                    Robot.shooter.setLoading(false);
                 }
             }
         }
