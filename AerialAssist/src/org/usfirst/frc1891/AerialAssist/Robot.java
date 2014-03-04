@@ -31,6 +31,11 @@ public class Robot extends IterativeRobot {
     public static DriveTrain driveTrain;
     
     public static final double MAX_RPM = 240.0; // 120 RPMs = ~4 Feet/Second
+    
+    // Robot Joystick Controls
+    public static final int
+            SHOOT_BUTTON = 1,
+            TILT_BUTTON = 2;
         
     /**
      * This function is run when the robot is first started up and should be
@@ -93,10 +98,11 @@ public class Robot extends IterativeRobot {
     public void teleopPeriodic() {
         Scheduler.getInstance().run();
         
-        driveTrain.driveUsingSpeed(Robot.oi.joystickController1.getYAxis() * MAX_RPM, -Robot.oi.joystickController2.getYAxis() * MAX_RPM);
+        driveTrain.driveUsingSpeed(Robot.oi.joystickController1.getYAxis() * MAX_RPM, 
+                -Robot.oi.joystickController2.getYAxis() * MAX_RPM);
         
-        // remember use BOTH joysticks to shoot
-        shooter.update();
+        // Updating the state of the shooter
+        shooter.update(); // remember to use BOTH joysticks to shoot
     }
     
     /**
