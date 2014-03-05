@@ -35,7 +35,7 @@ public class Robot extends IterativeRobot {
     // Robot Joystick Controls
     public static final int
             SHOOT_BUTTON = 1,
-            TILT_BUTTON = 2;
+            TILT_BUTTON = 3;
         
     /**
      * This function is run when the robot is first started up and should be

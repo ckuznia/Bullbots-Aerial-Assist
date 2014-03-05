@@ -62,10 +62,13 @@ public class Shooter extends Subsystem {
             DOWN_POT_TOLERANCE = 0.1,
             
             // Angle(tilt) motor
-            ANGLE_MOTOR_SPEED = 0.50,
+            ANGLE_MOTOR_SPEED = 0.8,
+            
+            // Shoot motor
+            SHOOT_MOTOR_SPEED = 0.1,
             
             // Delays
-            POST_SHOOT_DELAY = 5000;
+            POST_SHOOT_DELAY = 1000;
     
     public Shooter() {
         // Checking the tilt position of the shooter
@@ -160,7 +163,7 @@ public class Shooter extends Subsystem {
     
     public boolean fireAndLock() {
         System.out.println("\tfireAndLock()");
-        shootMotor.set(1.0);
+        shootMotor.set(SHOOT_MOTOR_SPEED);
         
         // Waiting until the lock is released (fired)
         if(!hasFired) {
@@ -179,6 +182,7 @@ public class Shooter extends Subsystem {
                 return true;
             }
         }
+        System.out.println("\t\tHasFired = " + hasFired);
         
         // Returning false until the robot has fired
         // and the winch has been relocked

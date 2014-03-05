@@ -14,9 +14,9 @@ public class Winch extends DualJaguar {
             SPEED = -1, 
             APPROACH_SPEED = -0.66, 
             UNWIND_SPEED = -SPEED,
-            UNWIND_OFFSET = -0.075,
+            UNWIND_OFFSET = 0.01, // Robot unwinds more than it winds down
             PRE_UNWIND_DELAY = 200,
-            SLOW_POINT = -1.45;
+            SLOW_POINT = -1.4; // -1.45
     public static boolean 
             isLocked = false,   // If the winch is in locked position
             sleeped = false,    // If the delay after unwinding was implemented
@@ -45,15 +45,15 @@ public class Winch extends DualJaguar {
             // Callibrating the winch...
             if(!RobotMap.shooterloadSwitch.get() && !isDown) {
                 // If it is away from the limit switch
-                if(roundedPosition > SLOW_POINT) {
+                //if(roundedPosition > SLOW_POINT) {
                     System.out.println("\t\tPulling shooter down... FAST");
                     this.driveUsingVoltage(SPEED);
-                }
-                // It is approaching the limit switch, slow down
+                //}
+                /*// It is approaching the limit switch, slow down
                 else {
                     System.out.println("\t\tPulling shooter down... SLOW");
                     this.driveUsingVoltage(APPROACH_SPEED);
-                }
+                }*/
             }
             else {
                 // Load switch was hit, so shooter is down
