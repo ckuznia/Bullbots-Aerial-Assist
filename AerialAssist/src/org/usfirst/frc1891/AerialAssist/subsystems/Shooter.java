@@ -14,9 +14,9 @@ import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.can.CANTimeoutException;
 import org.usfirst.frc1891.AerialAssist.RobotMap;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import org.bullbots.core.Jaguar;
 import org.usfirst.frc1891.AerialAssist.Robot;
-
 /**
  *
  */
@@ -45,6 +45,9 @@ public class Shooter extends Subsystem {
     + 
     */
     
+    // For knowing what mode the robot is in
+    private Robot robot;
+    
     private boolean 
             // Shooter states
             isLoaded = false, 
@@ -52,7 +55,10 @@ public class Shooter extends Subsystem {
             isLoading = false,
             isDown, // The robots tilt position will be checked and assigned on startup
             isTiltingShooter = false, 
-            hasFired = false;
+            hasFired = false,
+    
+            // Autonomous
+            tapeFound = false;
     private final double 
             // Potentiometer
             UP_POT_VALUE = 3.01, // Always the smaller value
@@ -65,65 +71,105 @@ public class Shooter extends Subsystem {
             ANGLE_MOTOR_SPEED = 0.8,
             
             // Shoot motor
-            SHOOT_MOTOR_SPEED = 0.1,
+            SHOOT_MOTOR_SPEED = 0.75,
             
             // Delays
-            POST_SHOOT_DELAY = 1000;
+            POST_SHOOT_DELAY = 5000;
     
-    public Shooter() {
+    private int tapeCheckCount = 0;
+    
+    public Shooter(Robot robot) {
+        this.robot = robot;
+        
         // Checking the tilt position of the shooter
         isDown = potentiometer.getVoltage() > MID_POT_VALUE;
     }
     
     public void update() {
-        updateShooting();
+        updateState();
         updateTilting();
     }
     
-    private void updateShooting() {
-        try {
-            // Shooter is loaded and ready to fire
-            if(isLoaded) {
-                System.out.println("LOADED");
-                // Must use BOTH joysticks to shoot, only active when shooter is not tilting
-                if(!isTiltingShooter && 
-                        Robot.oi.joystickController1.isButtonDown(Robot.SHOOT_BUTTON) && 
-                        Robot.oi.joystickController2.isButtonDown(Robot.SHOOT_BUTTON)) {
-                    isLoaded = false;
-                    isShooting = true;
-                    System.out.println("\t===| SHOOTER FIRED |=== (Button was pressed)");
-                }
-            }
-            // Shooter is in the middle of the shooting process
-            else if(isShooting) {
-                System.out.println("SHOOTING");
-                
-                // If finished firing and locking the winch, delay before reloading
-                if(fireAndLock()) {
-                    System.out.println("\tJust started waiting...");
-                    Thread.sleep((int) POST_SHOOT_DELAY);
-                    isShooting = false;
-                    System.out.println("\tJust ENDED waiting...");
-                }
-            }
-            // Shooter is loading
-            else if(isLoading) {
-                System.out.println("LOADING");
-                load();
-            }
-            // Shooter is ready to load (idle)
-            else {
-                System.out.println("READY TO LOAD");
-                
-                // Resetting the 0 point on the robot (Re-calibrating)
-                RobotMap.winchJags.getMasterJag().enableControl(0.0);
-                load();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (CANTimeoutException ex) {
-            ex.printStackTrace();
+    private void updateState() {
+        // Shooter is loaded and ready to fire
+        if(isLoaded) updateLoaded();
+        
+        // Shooter is in the middle of the shooting process
+        else if(isShooting) updateShooting();
+        
+        // Shooter is loading
+        else if(isLoading) updateLoading();
+        
+        // Shooter is ready to load (in it's idle state)
+        else {
+            // Checking if we are in teleop or autonomous mode...
+            
+            // If in Autonomous
+            if(robot.isAutonomous()) updateIdleAutonomous();
+            // Otherwise, In Teleop mode
+            else updateIdleTeleop();
         }
+    }
+    
+    private void updateLoaded() {
+        System.out.println("LOADED");
+        // Must use BOTH joysticks to shoot, only active when shooter is not tilting
+        if(!isTiltingShooter && 
+                Robot.oi.joystickController1.isButtonDown(Robot.SHOOT_BUTTON) && 
+                Robot.oi.joystickController2.isButtonDown(Robot.SHOOT_BUTTON)) {
+            isLoaded = false;
+            isShooting = true;
+            System.out.println("\t===| SHOOTER FIRED |=== (Button was pressed)");
+        }
+    }
+    
+    private void updateShooting() {
+        System.out.println("SHOOTING");
+        
+        // If finished firing and locking the winch, delay before reloading
+        if(fireAndLock()) {
+            System.out.println("\tJust started waiting...");
+            try {
+                Thread.sleep((int) POST_SHOOT_DELAY);
+            }
+            catch(Exception e) {
+                e.printStackTrace();
+            }
+            isShooting = false;
+            System.out.println("\tJust ENDED waiting...");
+        }
+    }
+    
+    private void updateLoading() {
+        System.out.println("LOADING");
+        load();
+    }
+    
+    private void updateIdleTeleop() {
+        System.out.println("READY TO LOAD - TELEOP");
+        resetZeroPoint();
+        load();
+    }
+    
+    /*
+    Autonomous:
+    1: Robot will start facing one of the sides,
+    start loading and looking for tape instantly
+    2: Record if we can see the tape
+    3: Straiten the robot up, and drive a certain distance
+    4: Turn towards the side that didn't have its tape lit
+    5: Fire.. then reload and tilt the shooter down
+    */
+    
+    private void updateIdleAutonomous() {
+        System.out.println("READY TO LOAD - AUTONOMOUS");
+        resetZeroPoint();
+        
+        // Loading the robot instantly
+        load();
+        
+        
+        
     }
     
     private void updateTilting() {
@@ -187,6 +233,15 @@ public class Shooter extends Subsystem {
         // Returning false until the robot has fired
         // and the winch has been relocked
         return false;
+    }
+    
+    private void resetZeroPoint() {
+        try {
+            // Resetting the 0 point on the robot (Re-calibrating)
+            RobotMap.winchJags.getMasterJag().enableControl(0.0);
+        } catch (CANTimeoutException ex) {
+            ex.printStackTrace();
+        }
     }
     
     public void load() {
