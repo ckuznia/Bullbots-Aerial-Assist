@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.can.CANTimeoutException;
 import org.usfirst.frc1891.AerialAssist.RobotMap;
 import edu.wpi.first.wpilibj.command.Subsystem;
-import edu.wpi.first.wpilibj.networktables.NetworkTable;
 import org.bullbots.core.Jaguar;
 import org.usfirst.frc1891.AerialAssist.Robot;
 /**
@@ -55,10 +54,7 @@ public class Shooter extends Subsystem {
             isLoading = false,
             isDown, // The robots tilt position will be checked and assigned on startup
             isTiltingShooter = false, 
-            hasFired = false,
-    
-            // Autonomous
-            tapeFound = false;
+            hasFired = false;
     private final double 
             // Potentiometer
             UP_POT_VALUE = 3.01, // Always the smaller value
@@ -75,9 +71,7 @@ public class Shooter extends Subsystem {
             
             // Delays
             POST_SHOOT_DELAY = 5000;
-    
-    private int tapeCheckCount = 0;
-    
+        
     public Shooter(Robot robot) {
         this.robot = robot;
         
@@ -85,6 +79,9 @@ public class Shooter extends Subsystem {
         isDown = potentiometer.getVoltage() > MID_POT_VALUE;
     }
     
+    /**
+     * Used to update the shooter during Tele-operation or Autonomous.
+     */
     public void update() {
         updateState();
         updateTilting();
@@ -132,7 +129,7 @@ public class Shooter extends Subsystem {
             try {
                 Thread.sleep((int) POST_SHOOT_DELAY);
             }
-            catch(Exception e) {
+            catch(InterruptedException e) {
                 e.printStackTrace();
             }
             isShooting = false;
@@ -147,29 +144,18 @@ public class Shooter extends Subsystem {
     
     private void updateIdleTeleop() {
         System.out.println("READY TO LOAD - TELEOP");
-        resetZeroPoint();
+        resetEncoderPos();
         load();
     }
     
-    /*
-    Autonomous:
-    1: Robot will start facing one of the sides,
-    start loading and looking for tape instantly
-    2: Record if we can see the tape
-    3: Straiten the robot up, and drive a certain distance
-    4: Turn towards the side that didn't have its tape lit
-    5: Fire.. then reload and tilt the shooter down
-    */
-    
     private void updateIdleAutonomous() {
         System.out.println("READY TO LOAD - AUTONOMOUS");
-        resetZeroPoint();
+        
+        // Resetting encoders
+        resetEncoderPos();
         
         // Loading the robot instantly
         load();
-        
-        
-        
     }
     
     private void updateTilting() {
@@ -235,7 +221,7 @@ public class Shooter extends Subsystem {
         return false;
     }
     
-    private void resetZeroPoint() {
+    private void resetEncoderPos() {
         try {
             // Resetting the 0 point on the robot (Re-calibrating)
             RobotMap.winchJags.getMasterJag().enableControl(0.0);

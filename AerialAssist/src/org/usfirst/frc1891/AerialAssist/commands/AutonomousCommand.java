@@ -12,6 +12,17 @@ import edu.wpi.first.wpilibj.can.CANTimeoutException;
 import edu.wpi.first.wpilibj.command.Command;
 import org.usfirst.frc1891.AerialAssist.Robot;
 import org.usfirst.frc1891.AerialAssist.RobotMap;
+
+    /*
+    Autonomous:
+    1: Robot will start facing one of the sides,
+    start loading and looking for tape instantly
+    2: Record if we can see the tape
+    3: Straiten the robot up, and drive a certain distance
+    4: Turn towards the side that didn't have its tape lit
+    5: Fire.. then reload and tilt the shooter down
+    */
+
 /**
  *
  */
