@@ -26,29 +26,41 @@ import org.usfirst.frc1891.AerialAssist.RobotMap;
     */
 
 /**
- *
+ * @author Clay Kuznia
  */
 public class  AutonomousCommand extends Command {
     
     private Robot robot;
     
     private final double 
-            // The maximum amount of times to check tape at the 
-            // start of autonomous
+            // The maximum amount of times to check tape at the start
+            // of autonomous before it will move on to the next step
             MAX_TAPE_CHECK_COUNT = 10,
             
-            TURN_AMOUNT = 0.1,
+            // Turning
+            TURN_DISTANCE = 0.1,
             TURN_SPEED = 120,
             
+            // Moving forward
             DISTANCE = 1.5,
-            FORWARD_SPEED = 120;
+            FORWARD_SPEED = 120,
+            
+            // Turning the second time
+            TURN_DISTANCE_2 = 0.1,
+            TURN_SPEED_2 = 120;
     
     private boolean 
+            // Tape finding
             isLookingForTape = false,
             tapeFound = false,
             
+            // Turning
             straight = false,
+            
+            // Going straight
             inPosition = false,
+            
+            // Turning again
             readyToFire = false,
             hasFired = false;
     
@@ -82,10 +94,11 @@ public class  AutonomousCommand extends Command {
             
             // Rounding the value in order not to overload the cRIO
             double roundedCurrentPos = Math.abs(Jaguar.roundValue(RobotMap.driveJags2.getMasterJag().getPosition()));
-
+            
+            // Robot is looking for goal tape
             if(isLookingForTape) {
                 if(robot.getTable().getBoolean("tapefound")) {
-                    System.out.println("\tTape found");
+                    System.out.println("\tTape found, DONE with tape");
                     tapeFound = true;
                     isLookingForTape = false;
                 }
@@ -95,27 +108,33 @@ public class  AutonomousCommand extends Command {
                     System.out.println("\tLooking for tape");
                     tapeCheckCount++;
                 }
-                // otherwise stop checking for tape and straighten up
+                // Otherwise stop checking for tape and begin the next step
                 else {
-                    System.out.println("\tDone looking for tape");
+                    System.out.println("\tDONE with tape");
                     tapeFound = isLookingForTape = false;
+                    
+                    // Resetting the start position again, to ensure
+                    // that it is really reset
+                    resetStartPos();
                 }
             }
             // Robot is straightening up
             else if(!straight) {
-                System.out.println("\tStraightening up : dif = " + (Math.abs(RobotMap.driveJags2.getMasterJag().getPosition() - startPosition)));
+                //System.out.println("\tStraightening up : dif = " + (Math.abs(roundedCurrentPos - startPosition)));
                 
                 // If we are not straight
-                if(Math.abs(roundedCurrentPos - startPosition) < TURN_AMOUNT) {
-                    System.out.println("\t\t Turning : ");
+                if(Math.abs(roundedCurrentPos - startPosition) < TURN_DISTANCE) {
+                    System.out.println("\t\tTurning : ");
                     straight = false;
-                    Robot.driveTrain.driveUsingSpeed(TURN_SPEED / 3, -TURN_SPEED);
+                    // Turning the robot counter-clockwise (left)
+                    Robot.driveTrain.driveUsingSpeed(-TURN_SPEED, -TURN_SPEED);
                 }
+                // Otherwise the robot is now straight, begin the next step
                 else {
                     Robot.driveTrain.stop();
                     straight = true;
-                    System.out.println("\tStart pos: " + startPosition);
-                    System.out.println("\tReal pos: " + RobotMap.driveJags2.getMasterJag().getPosition());
+                    //System.out.println("\tStart pos: " + startPosition);
+                    //System.out.println("\tReal pos: " + RobotMap.driveJags2.getMasterJag().getPosition());
                     System.out.println("\tDONE Straightening up");
                     
                     resetStartPos();
@@ -123,23 +142,66 @@ public class  AutonomousCommand extends Command {
             }
             // Robot is moving forward a certain distance
             else if(!inPosition) {
+                // If not in position
                 if(Math.abs(roundedCurrentPos - startPosition) < DISTANCE) {
+                    System.out.println("Moving to position");
                     Robot.driveTrain.driveUsingSpeed(FORWARD_SPEED, -FORWARD_SPEED);
                     inPosition = false;
                     System.out.println("Driving into position");
                 }
+                // Otherwise, we are in position so stop and move to the next step
                 else {
                     Robot.driveTrain.stop();
                     inPosition = true;
                     System.out.println("In position");
+                    
+                    resetStartPos();
                 }
             }
-            // Robot in in position and will now turn towards the correct goal
-            else if(readyToFire) {
-                
-            }
+            // Robot in in position and will now turn towards the correct goal and fire
             else if(!hasFired) {
+                System.out.println("\tTURN 2");
+                // If we are not facing the goal yet
+                if(!readyToFire) {
+                    // Check if we are done turning
+                    if(Math.abs(roundedCurrentPos - startPosition) < TURN_DISTANCE_2) {
+                        System.out.println("Turning toward goal");
+                        readyToFire = false;
+                        
+                        // Turning toward the correct goal...
+                        
+                        // Turning toward left goal (counter-clockwise)
+                        if(tapeFound) { 
+                            Robot.driveTrain.driveUsingSpeed(-TURN_SPEED_2, -TURN_SPEED_2);
+                            System.out.println("Turning LEFT");
+                        }
+                        // Turning toward right goal (clockwise)
+                        else {
+                            Robot.driveTrain.driveUsingSpeed(TURN_SPEED_2, TURN_SPEED_2);
+                            System.out.println("Turning RIGHT");
+                        }
+                    }
+                    // We are done turning, and we can fire
+                    else {
+                        readyToFire = true;
+                    }
+                }
+                // Otherwise fire at the goal
+                else {
+                    System.out.println("FIRING!!!");
+                    Robot.shooter.setLoaded(false);
+                    Robot.shooter.setShooting(true);
+                    readyToFire = false;
+                    hasFired = true;
+                }
+            }
+            // Robot will now finish up Autonomous by turning around,
+            // tilting the shooter, and loading
+            else {
+                // Now turn the robot around, load, and tilt the shooter down
+                System.out.println("Ready to turn around, load, and tilt...");
                 
+                // (Shooter will automatically load) so just do tilting and turning
             }
             
             
