@@ -113,8 +113,9 @@ public class Shooter extends Subsystem {
     
     private void updateLoaded() {
         System.out.println("LOADED");
-        // Must use BOTH joysticks to shoot, only active when shooter is not tilting
+        // Must use BOTH joysticks to shoot, only active when shooter is not tilting and is up
         if(!isTiltingShooter && 
+                !isDown &&
                 Robot.oi.joystickController1.isButtonDown(Robot.SHOOT_BUTTON) && 
                 Robot.oi.joystickController2.isButtonDown(Robot.SHOOT_BUTTON)) {
             isLoaded = false;
@@ -128,7 +129,7 @@ public class Shooter extends Subsystem {
         
         // If finished firing and locking the winch, delay before reloading
         if(fireAndLock()) {
-            System.out.println("\tJust started waiting...");
+            //System.out.println("\tJust started waiting...");
             try {
                 Thread.sleep((int) POST_SHOOT_DELAY);
             }
@@ -136,7 +137,7 @@ public class Shooter extends Subsystem {
                 e.printStackTrace();
             }
             isShooting = false;
-            System.out.println("\tJust ENDED waiting...");
+            //System.out.println("\tJust ENDED waiting...");
         }
     }
     
@@ -147,7 +148,11 @@ public class Shooter extends Subsystem {
     
     private void updateIdleTeleop() {
         System.out.println("READY TO LOAD - TELEOP");
+        
+        // Resetting encoders
         resetEncoderPos();
+        
+        // Loading robot instantly
         load();
     }
     
@@ -197,27 +202,27 @@ public class Shooter extends Subsystem {
     }
     
     public boolean fireAndLock() {
-        System.out.println("\tfireAndLock()");
+        //System.out.println("\tfireAndLock()");
         shootMotor.set(SHOOT_MOTOR_SPEED);
         
         // Waiting until the lock is released (fired)
         if(!hasFired) {
             hasFired = !shootSwitch.get();
-            System.out.println("\t\tNot Fired");
+            //System.out.println("\t\tNot Fired");
         }
         
         // Now waiting until the motor is back on the
         // switch, then stopping the motor (locked)
         else {
-            System.out.println("\t\tFIRED! (Winch unlocked)");
+            //System.out.println("\t\tFIRED! (Winch unlocked)");
             if(shootSwitch.get()) {
-                System.out.println("\t\tLocked Winch.. done with fireAndLock()");
+                //System.out.println("\t\tLocked Winch.. done with fireAndLock()");
                 shootMotor.set(0.0);
                 hasFired = false;
                 return true;
             }
         }
-        System.out.println("\t\tHasFired = " + hasFired);
+        //System.out.println("\t\tHasFired = " + hasFired);
         
         // Returning false until the robot has fired
         // and the winch has been relocked

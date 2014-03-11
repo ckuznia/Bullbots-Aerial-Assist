@@ -12,7 +12,7 @@ public class Winch extends DualJaguar {
     private final double 
             SPEED = -1, 
             UNWIND_SPEED = -SPEED,
-            UNWIND_OFFSET = 0.01, // Robot may unwind more or less than it winds down
+            UNWIND_OFFSET = 0.0, // Robot may unwind more or less than it winds down (Positive is more unwinding, negative is less)
             PRE_UNWIND_DELAY = 200;
     public static boolean 
             isLocked = false,   // If the winch is in locked position

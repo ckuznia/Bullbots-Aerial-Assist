@@ -86,6 +86,8 @@ public class Robot extends IterativeRobot {
     public void autonomousInit() {
         // schedule the autonomous command (example)
         if (autonomousCommand != null) autonomousCommand.start();
+        ((AutonomousCommand) autonomousCommand).resetValues();
+        System.out.println("Auto init");
     }
     
     /**
@@ -114,7 +116,21 @@ public class Robot extends IterativeRobot {
         
         driveTrain.updateTeleop();
         //shooter.update();
+       /* try {
+            //System.out.println("\nPos Jag 1: (Master) " + RobotMap.driveJags1.getMasterJag().getPosition());
+            //System.out.println("\nWinch Current: (Master) " + RobotMap.winchJags.getMasterJag().getOutputCurrent());
+            //System.out.println("Winch Current: (Slave) " + RobotMap.winchJags.getSlaveJag().getOutputCurrent());
+            //System.out.println("Winch Voltage: (Master) " + RobotMap.winchJags.getMasterJag().getOutputVoltage());
+            //System.out.println("Winch Voltage: (Slave) " + RobotMap.winchJags.getSlaveJag().getOutputVoltage());
+        } catch (CANTimeoutException ex) {
+            ex.printStackTrace();
+        }*/
     }
+    
+    
+    
+    boolean hasTurned = false;
+    
     
     /**
      * This function called periodically during test mode
@@ -124,12 +140,20 @@ public class Robot extends IterativeRobot {
         
         RobotMap.winchJags.showPosition();
         
+        // Turning the winch one revolution
+        if(!hasTurned) {
+            System.out.println("Told motors to turn in testPeriodic()");
+            //RobotMap.winchJags.driveUsingPosition(60);
+            hasTurned = true;
+        }
+        
         // Continually driving the motors to the setpoint configured in the LiveWindow
         //driveTrain.driveUsingSpeed(RobotMap.driveJags1.setPoint, RobotMap.driveJags2.setPoint);
     }
     
     public void testInit() {
          LiveWindow.setEnabled(true);
+         hasTurned = false;
     }
     
     public NetworkTable getTable() {
