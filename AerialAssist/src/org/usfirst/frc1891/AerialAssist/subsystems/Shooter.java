@@ -44,11 +44,25 @@ public class Shooter extends Subsystem {
     
     /*
     Bugs:
-    + 
+    + May be a bug with shooter motor
     */
     
-    // For knowing what mode the robot is in
-    private Robot robot;
+    /*
+    Do this sometime:
+    
+    public void setSomeState(boolean value) {
+    
+        someState = value
+        if(someState) {
+            otherState = false;
+            otherState2 = false;
+            ...
+        }
+    }
+    */
+    
+    // For knowing what mode the robot is in (Teleop or Autonomous)
+    private final Robot robot;
     
     private boolean 
             // Shooter states
@@ -78,7 +92,7 @@ public class Shooter extends Subsystem {
     public Shooter(Robot robot) {
         this.robot = robot;
         
-        // Checking the tilt position of the shooter
+        // Finding the tilt position of the shooter
         isDown = potentiometer.getVoltage() > MID_POT_VALUE;
     }
     
@@ -112,7 +126,7 @@ public class Shooter extends Subsystem {
     }
     
     private void updateLoaded() {
-        System.out.println("LOADED");
+        System.out.println("Shooter State: Loaded");
         // Must use BOTH joysticks to shoot, only active when shooter is not tilting and is up
         if(!isTiltingShooter && 
                 !isDown &&
@@ -120,12 +134,11 @@ public class Shooter extends Subsystem {
                 Robot.oi.joystickController2.isButtonDown(Robot.SHOOT_BUTTON)) {
             isLoaded = false;
             isShooting = true;
-            System.out.println("\t===| SHOOTER FIRED |=== (Button was pressed)");
         }
     }
     
     private void updateShooting() {
-        System.out.println("SHOOTING");
+        System.out.println("Shooter State: Shooting");
         
         // If finished firing and locking the winch, delay before reloading
         if(fireAndLock()) {
@@ -142,12 +155,12 @@ public class Shooter extends Subsystem {
     }
     
     private void updateLoading() {
-        System.out.println("LOADING");
+        System.out.println("Shooter State: Loading");
         load();
     }
     
     private void updateIdleTeleop() {
-        System.out.println("READY TO LOAD - TELEOP");
+        System.out.println("Shooter State: Ready to Load - Teleop");
         
         // Resetting encoders
         resetEncoderPos();
@@ -157,7 +170,7 @@ public class Shooter extends Subsystem {
     }
     
     private void updateIdleAutonomous() {
-        System.out.println("READY TO LOAD - AUTONOMOUS");
+        System.out.println("Shooter State: Ready to Load - Autonomous");
         
         // Resetting encoders
         resetEncoderPos();

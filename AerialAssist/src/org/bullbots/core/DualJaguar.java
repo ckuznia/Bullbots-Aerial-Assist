@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.can.CANTimeoutException;
 import edu.wpi.first.wpilibj.livewindow.LiveWindowSendable;
 import edu.wpi.first.wpilibj.tables.ITable;
 import edu.wpi.first.wpilibj.tables.ITableListener;
+import edu.wpi.first.wpilibj.tables.TableKeyNotDefinedException;
 
 /**
  * @author Clay Kuznia
@@ -11,9 +12,11 @@ import edu.wpi.first.wpilibj.tables.ITableListener;
 public class DualJaguar implements LiveWindowSendable {
     
     protected Jaguar MASTER_JAG, SLAVE_JAG;
-    protected ITable table; // Table for configuring PIDs
+    // Table for configuring PIDs
+    protected ITable table;
     
-    public double setPoint = 0.0; // For tunning PIDs
+    // For tunning PIDs
+    public double setPoint = 0.0;
     
     public DualJaguar(int MASTER_ID, int SLAVE_ID, double P, double I, double D) {
         try {
@@ -35,8 +38,10 @@ public class DualJaguar implements LiveWindowSendable {
             double roundedSetValue = Jaguar.roundValue(RPM);
             double roundedGetValue = Jaguar.roundValue(MASTER_JAG.getSpeed());            
             
-            // Updating the speed of the master jag
+            // Updating the speed of the master jag, if needed
             if(roundedGetValue != roundedSetValue) MASTER_JAG.driveUsingSpeed(roundedSetValue);
+            
+            // Updating the speed of the slave jaguar
             matchSlaveWithMaster();
         }
         catch(CANTimeoutException e) {
@@ -45,8 +50,17 @@ public class DualJaguar implements LiveWindowSendable {
     }
     
     public void driveUsingPosition(double rotations) {
+        // This method is incomplete, need to look up how position mode
+        // acutally works and then go from there...
+        
         MASTER_JAG.driveUsingPosition(rotations);
-        matchSlaveWithMaster();
+        
+        /*
+        The slave motor is just dragged along with
+        the master, so in order to move you must
+        overcome more friction than usual.
+        */
+        
     }
     
     public void driveUsingCurrent(double current) {
@@ -55,8 +69,10 @@ public class DualJaguar implements LiveWindowSendable {
             double roundedSetValue = Jaguar.roundValue(current);
             double roundedGetValue = Jaguar.roundValue(MASTER_JAG.getOutputCurrent());
             
-            // Updating the speed of the master jag
+            // Updating the speed of the master jaguar
             if(roundedGetValue != roundedSetValue) MASTER_JAG.driveUsingCurrent(roundedSetValue);
+            
+            // Updating the speed of the slave jaguar
             matchSlaveWithMaster();
         }
         catch(CANTimeoutException e) {
@@ -95,46 +111,77 @@ public class DualJaguar implements LiveWindowSendable {
                 // Updating values
                 MASTER_JAG.setPID(table.getNumber("p"), table.getNumber("i"), table.getNumber("d"));
                 setPoint = table.getNumber("setpoint");
-                if (table.getBoolean("enabled")) MASTER_JAG.disableControl();
-                else MASTER_JAG.enableControl();
+                
+                // Enabling or disabling the CANJaguars' control
+                if (table.getBoolean("enabled")) {
+                    MASTER_JAG.enableControl();
+                    SLAVE_JAG.enableControl();
+                }
+                else {
+                    MASTER_JAG.disableControl();
+                    SLAVE_JAG.disableControl();
+                }
             }
-            catch(Exception e ) {
+            catch(CANTimeoutException e ) {
+                e.printStackTrace();
+            } catch (TableKeyNotDefinedException e) {
                 e.printStackTrace();
             }
         }
     };
-    
    
-    public void initTable(ITable table) {
-        if(this.table!=null) this.table.removeTableListener(listener);
-        this.table = table;
-        if(table!=null) {
+    public void initTable(ITable newTable) {
+        // Removing listeners from the old table
+        if(this.table != null) this.table.removeTableListener(listener);
+        
+        // Assigning the new table to the old table
+        this.table = newTable;
+        
+        // Initializing the new table
+        if(newTable != null) {
             try {
-                table.putNumber("p", MASTER_JAG.getP());
-                table.putNumber("i", MASTER_JAG.getI());
-                table.putNumber("d", MASTER_JAG.getD());
-                table.putNumber("setpoint", MASTER_JAG.getX());
-                table.putBoolean("enabled", MASTER_JAG.isAlive());
-                table.addTableListener(listener, false);
+                newTable.putNumber("p", MASTER_JAG.getP());
+                newTable.putNumber("i", MASTER_JAG.getI());
+                newTable.putNumber("d", MASTER_JAG.getD());
+                newTable.putNumber("setpoint", MASTER_JAG.getX());
+                /*
+                It is unknown at the moment what 'isAlive()' actually
+                refers to (the 2013-2014 API does not specify), but 
+                we are assuming that it has to do with whether the 
+                CANJaguar is enabled or not.
+                */
+                newTable.putBoolean("enabled", MASTER_JAG.isAlive());
+                newTable.addTableListener(listener, false);
             }
-            catch(Exception e) {
+            catch(CANTimeoutException e) {
                 e.printStackTrace();
             }
         }
     }
     
-    public ITable getTable(){
+    public ITable getTable() {
         return table;
     }
     
     public void updateTable() {}
     
     public void startLiveWindowMode() {
-        // Stopping the jags for safety
+        // Stopping the CANJaguar just before the
+        // LiveWindow starts for safety purposes
         stop();
     }
     
     public void stopLiveWindowMode() {}
+    
+    public void showVoltage() {
+        MASTER_JAG.showVoltage();
+        SLAVE_JAG.showVoltage();
+    }
+    
+    public void showCurrent() {
+        MASTER_JAG.showCurrent();
+        SLAVE_JAG.showCurrent();
+    }
     
     public Jaguar getMasterJag() {
         return MASTER_JAG;

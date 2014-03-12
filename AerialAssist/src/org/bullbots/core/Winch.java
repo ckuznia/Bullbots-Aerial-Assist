@@ -25,20 +25,25 @@ public class Winch extends DualJaguar {
     
     public void calibrate() {
         try {
+            // Setting state values
             Robot.shooter.setLoaded(false);
             Robot.shooter.setLoading(true);
             
-            // Rounding the position value to 2 decimal places, that 
-            // way we are not checking a lot of floating point values
+            /*
+            Rounding the position value to 2 decimal places, that 
+            way we are not overloading the cRIO by checking a lot 
+            of floating point values.
+            */
             double roundedPosition = Jaguar.roundValue(MASTER_JAG.getPosition());
             
-            // Relocking the winch in order to make sure it is locked
+            // Relocking the winch in order to ensure it is locked
             if(!isLocked && Robot.shooter.fireAndLock()) isLocked = true;
             
             // If the loadswitch has not been hit yet, keep driving the winch down
             if(!RobotMap.shooterloadSwitch.get() && !isDown) this.driveUsingVoltage(SPEED);
+            // Load switch was hit
             else {
-                // Load switch was hit, so shooter is down
+                // Shooter is now down
                 isDown = true;
                 
                 // Putting a delay before the winch is driven the other way to unwind
@@ -51,14 +56,15 @@ public class Winch extends DualJaguar {
                     sleeped = true;
                 }
                 
-                // Unwinding the winch, once finished, then shooter is ready to fire
-                // (The 0.0 is redundant, but it makes it more clear that we want
-                // the shooter to be back at the 0 position with a minor tolerance,
-                // that tolerance being UNWIND_OFFSET.
+                /*
+                Unwinding the winch, once finished, then shooter is ready to fire
+                (The 0.0 is redundant, but it makes it more clear that we want
+                the shooter to be back at the 0 position with a minor offset,
+                with that offset being 'UNWIND_OFFSET'.
+                */
                 if(roundedPosition < 0.0 + UNWIND_OFFSET) this.driveUsingVoltage(UNWIND_SPEED);
+                // Robot is fully loaded and ready to fire
                 else {
-                    // Robot is fully loaded and ready to fire
-                    
                     // Stopping everything
                     this.stop();
                     

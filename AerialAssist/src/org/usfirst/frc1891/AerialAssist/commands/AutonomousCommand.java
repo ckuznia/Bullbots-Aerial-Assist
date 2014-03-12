@@ -9,6 +9,7 @@
 // it from being updated in the future.
 
 package org.usfirst.frc1891.AerialAssist.commands;
+
 import edu.wpi.first.wpilibj.can.CANTimeoutException;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.tables.TableKeyNotDefinedException;
@@ -16,20 +17,22 @@ import org.bullbots.core.Jaguar;
 import org.usfirst.frc1891.AerialAssist.Robot;
 import org.usfirst.frc1891.AerialAssist.RobotMap;
 
-    /*
-    Autonomous:
-    1: Robot will start facing one of the sides,
-    start loading and looking for tape instantly
-    2: Record if we can see the tape
-    3: Straiten the robot up, and drive a certain distance
-    4: Turn towards the side that didn't have its tape lit
-    5: Fire.. then reload and tilt the shooter down
-    */
-
 /**
  * @author Clay Kuznia
  */
 public class  AutonomousCommand extends Command {
+    
+    /*
+    Autonomous:
+    1: Robot will be lined up parallel to the goals and
+    have the left goal's reflective tape inside the camera's
+    field of view
+    2: Record if we can see the tape, and start loading at the same time
+    3: Once we know what goal is hot, drive a certain distance forward
+    4: Then turn towards the side that didn't have its tape lit (Since
+    that side will now be a hot goal by the time we fire)
+    5: Fire.. then reload
+    */
     
     private Robot robot;
     
@@ -48,7 +51,7 @@ public class  AutonomousCommand extends Command {
             
             // Turning the second time
             TURN_DISTANCE_2 = 0.04,
-            TURN_SPEED_2 = 180;
+            TURN_SPEED_2 = FORWARD_SPEED;
     
     private boolean 
             isDone = false,
