@@ -31,7 +31,6 @@ public class RobotMap {
     public static DigitalInput shooterloadSwitch;
     public static SpeedController shootershootMotor;
     public static DigitalInput shootershootSwitch;
-    public static AnalogChannel shooterIRSensor2;
     public static AnalogChannel shooterIRSensor1;
     public static AnalogChannel shooterpotentiometer;
     public static SpeedController shooterangleMotor;
@@ -51,11 +50,8 @@ public class RobotMap {
         shootershootSwitch = new DigitalInput(1, 6);
 	LiveWindow.addSensor("Shooter", "shootSwitch", shootershootSwitch);
         
-        //shooterIRSensor2 = new AnalogChannel(1, 5);
-	//LiveWindow.addSensor("Shooter", "IRSensor2", shooterIRSensor2);
-        
-        //shooterIRSensor1 = new AnalogChannel(1, 4);
-	//LiveWindow.addSensor("Shooter", "IRSensor1", shooterIRSensor1);
+        shooterIRSensor1 = new AnalogChannel(1, 4);
+	LiveWindow.addSensor("Shooter", "IR", shooterIRSensor1);
         
         shooterpotentiometer = new AnalogChannel(1, 3);
 	LiveWindow.addSensor("Shooter", "potentiometer", shooterpotentiometer);

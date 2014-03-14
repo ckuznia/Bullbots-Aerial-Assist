@@ -86,8 +86,7 @@ public class  AutonomousCommand extends Command {
     
     // Called just before this Command runs the first time
     protected void initialize() {
-        // Setting the mode on the table
-        robot.getTable().putString("robotMode", "AUTO");
+        // Setting the start position of the encoders to 0
         resetStartPos();
         
         // Setting values to ensure they are set correctly
@@ -181,7 +180,14 @@ public class  AutonomousCommand extends Command {
                 System.out.println("Step 3");
                 
                 // If not in position
-                if(Math.abs(roundedCurrentPos - startPosition) < DISTANCE) {
+                if(!Robot.shooter.inRange()) Robot.driveTrain.driveUsingSpeed(FORWARD_SPEED, -FORWARD_SPEED);
+                // Otherwise, in position
+                else {
+                    Robot.driveTrain.stop();
+                    inPosition = true;
+                }
+                
+                /*if(Math.abs(roundedCurrentPos - startPosition) < DISTANCE) {
                     Robot.driveTrain.driveUsingSpeed(FORWARD_SPEED, -FORWARD_SPEED);
                     inPosition = false;
                     System.out.println("\tDriving into position");
@@ -193,7 +199,7 @@ public class  AutonomousCommand extends Command {
                     System.out.println("\tIn position");
                     
                     resetStartPos();
-                }
+                }*/
             }
             // Robot in in position and will now turn towards the correct goal and fire
             else if(!hasFired) {

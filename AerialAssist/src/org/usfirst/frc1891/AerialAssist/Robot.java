@@ -89,23 +89,6 @@ public class Robot extends IterativeRobot {
         RobotMap.winchJags.getSlaveJag().printSettings();
     }
     
-    public void autonomousInit() {
-        // schedule the autonomous command (example)
-        if (autonomousCommand != null) autonomousCommand.start();
-        
-        // Resetting the values used in autonomous, that way
-        // whenever the mode is switched back to Autonomous,
-        // Autonomous will restart.
-        ((AutonomousCommand) autonomousCommand).resetValues();
-    }
-    
-    /**
-     * This function is called periodically during autonomous
-     */
-    public void autonomousPeriodic() {
-        Scheduler.getInstance().run();
-    }
-    
     public void teleopInit() {
 	// This makes sure that the autonomous stops running when
         // teleop starts running. If you want the autonomous to 
@@ -118,6 +101,28 @@ public class Robot extends IterativeRobot {
         // to use and what object to look for.
         table.putString("robotMode", "TELEOP");
     }
+    
+    public void autonomousInit() {
+        // schedule the autonomous command (example)
+        if (autonomousCommand != null) autonomousCommand.start();
+        
+        // Resetting the values used in autonomous, that way
+        // whenever the mode is switched back to Autonomous,
+        // Autonomous will restart.
+        ((AutonomousCommand) autonomousCommand).resetValues();
+        
+        // Setting the mode on the NetworkTable, that way our 
+        // image processor (the second laptop) knows what camera
+        // to use and what object to look for.
+        table.putString("robotMode", "AUTO");
+    }
+    
+    /**
+     * This function is called periodically during autonomous
+     */
+    public void autonomousPeriodic() {
+        Scheduler.getInstance().run();
+    }
         
     /**
      * This function is called periodically during operator control
@@ -127,7 +132,7 @@ public class Robot extends IterativeRobot {
         
         // Updating everything...
         driveTrain.updateTeleop();
-        //shooter.update();
+        shooter.update();
     }
     
     /**
