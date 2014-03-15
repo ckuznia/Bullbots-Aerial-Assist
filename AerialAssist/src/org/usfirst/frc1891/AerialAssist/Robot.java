@@ -40,7 +40,7 @@ public class Robot extends IterativeRobot {
     public static DriveTrain driveTrain;
     
     public static final double 
-            MAX_POS_RPM = 240.0, // 120 RPMs = ~4 Feet/Second
+            MAX_POS_RPM = 320.0, // 120 RPMs = ~4 Feet/Second
             MAX_NEG_RPM = -MAX_POS_RPM;
     public static double currentSpeed = MAX_POS_RPM;
     // Robot Joystick Controls

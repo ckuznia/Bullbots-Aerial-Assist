@@ -41,13 +41,9 @@ public class  AutonomousCommand extends Command {
             // of autonomous before it will move on to the next step
             MAX_TAPE_CHECK_COUNT = 10,
             
-            // Turning
-            TURN_DISTANCE = 0.05,
-            TURN_SPEED = 120,
-            
             // Moving forward
-            DISTANCE = 0.75,
-            FORWARD_SPEED = 180,
+            DISTANCE = 2,
+            FORWARD_SPEED = 80, // 120
             
             // Turning the second time
             TURN_DISTANCE_2 = 0.04,
@@ -60,9 +56,6 @@ public class  AutonomousCommand extends Command {
             // Tape finding
             isLookingForTape = true,
             tapeFound = false,
-            
-            // Turning
-            straight = false,
             
             // Going straight
             inPosition = false,
@@ -96,12 +89,11 @@ public class  AutonomousCommand extends Command {
     // Called repeatedly when this Command is scheduled to run
     protected void execute() {
         try {
+            // Updating the shooter status
             Robot.shooter.update();
+            
             // If finished with autonomous, don't do anything
             if(isDone) return;
-            
-            
-            
             
             // Rounding the value in order not to overload the cRIO
             double roundedCurrentPos = Math.abs(Jaguar.roundValue(RobotMap.driveJags2.getMasterJag().getPosition()));
@@ -118,6 +110,8 @@ public class  AutonomousCommand extends Command {
                     System.out.println("\tSUCCESS reading tapeFound");
                 }
                 catch(TableKeyNotDefinedException e) {
+                    // It failed, meaning that the value has probably
+                    // not been set yet
                     e.printStackTrace();
                     tableReady = false;
                     System.out.println("\tFAILED reading tapeFound");
@@ -179,15 +173,15 @@ public class  AutonomousCommand extends Command {
             */else if(!inPosition) {
                 System.out.println("Step 3");
                 
-                // If not in position
+                /*// If not in position
                 if(!Robot.shooter.inRange()) Robot.driveTrain.driveUsingSpeed(FORWARD_SPEED, -FORWARD_SPEED);
                 // Otherwise, in position
                 else {
                     Robot.driveTrain.stop();
                     inPosition = true;
-                }
+                }*/
                 
-                /*if(Math.abs(roundedCurrentPos - startPosition) < DISTANCE) {
+                if(Math.abs(roundedCurrentPos - startPosition) < DISTANCE) {
                     Robot.driveTrain.driveUsingSpeed(FORWARD_SPEED, -FORWARD_SPEED);
                     inPosition = false;
                     System.out.println("\tDriving into position");
@@ -199,7 +193,7 @@ public class  AutonomousCommand extends Command {
                     System.out.println("\tIn position");
                     
                     resetStartPos();
-                }*/
+                }
             }
             // Robot in in position and will now turn towards the correct goal and fire
             else if(!hasFired) {
@@ -284,7 +278,7 @@ public class  AutonomousCommand extends Command {
     public void resetValues() {
         // Resetting values
         isLookingForTape = true;
-        isDone = tapeFound = straight = inPosition = readyToFire = hasFired = false;
+        isDone = tapeFound = inPosition = readyToFire = hasFired = false;
     }
     
     // Make this return true when this Command no longer needs to run execute()

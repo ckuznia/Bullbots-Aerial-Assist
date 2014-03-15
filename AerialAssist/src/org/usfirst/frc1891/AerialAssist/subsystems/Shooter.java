@@ -74,8 +74,8 @@ public class Shooter extends Subsystem {
             hasFired = false;
     private final double 
             // Potentiometer
-            UP_POT_VALUE = 2.46, // Always the smaller value // 3.01 on second robot
-            DOWN_POT_VALUE = 4.47, // Always the bigger value // 4.73 on second robot
+            UP_POT_VALUE = 2.46, // Always the smaller value
+            DOWN_POT_VALUE = 4.47, // Always the bigger value
             MID_POT_VALUE = (UP_POT_VALUE + DOWN_POT_VALUE) / 2,
             UP_POT_TOLERANCE = 0.03,
             DOWN_POT_TOLERANCE = 0.1,
@@ -87,11 +87,12 @@ public class Shooter extends Subsystem {
             SHOOT_MOTOR_SPEED = 0.2,
             
             // Delays
-            POST_SHOOT_DELAY = 15000, //1200
+            POST_SHOOT_DELAY = 1200, //1200
             
             // IR Values
-            MIN_IR_VALUE = 7.4, // 7.431
-            MAX_IR_VALUE = 7.5;
+            MIN_IR_VALUE = 1.95, // 2.0 is the actual spot
+            MAX_IR_VALUE = 2.1,
+            IR_TOLERANCE = 0.1;
     private long startTime;
         
     public Shooter(Robot robot) {
@@ -131,6 +132,8 @@ public class Shooter extends Subsystem {
     }
     
     private void updateLoaded() {
+        SmartDashboard.putBoolean("inrange", autoInRange());
+        
         System.out.println("Shooter State: Loaded");
         // Must use BOTH joysticks to shoot, only active when shooter is not tilting and is up
         if(!isTiltingShooter && 
@@ -143,7 +146,7 @@ public class Shooter extends Subsystem {
         }
         System.out.println("isTiltingShooter: " + isTiltingShooter + " isDown" + isDown);
         
-        SmartDashboard.putBoolean("inrange", inRange());
+        
     }
     
     private void updateShooting() {
@@ -152,24 +155,24 @@ public class Shooter extends Subsystem {
         // Checking to see if we are finished firing and locking the winch
         if(fireAndLock()) {
             //System.out.println("\tJust started waiting...");
-            /*try {
+            try {
                 Thread.sleep((int) POST_SHOOT_DELAY);
             }
             catch(InterruptedException e) {
                 e.printStackTrace();
-            }*/
-            ///isShooting = false;
+            }
+            isShooting = false;
             //System.out.println("\tJust ENDED waiting...");
             
             
             
             // Starting the timer
-            startTime = System.currentTimeMillis();
+            //startTime = System.currentTimeMillis();
         }
-        // Delay before moving onto the next state
+        /*// Delay before moving onto the next state
         else {
             if(System.currentTimeMillis() >= startTime + POST_SHOOT_DELAY) isShooting = false;
-        }
+        }*/
     }
     
     private void updateLoading() {
@@ -278,7 +281,12 @@ public class Shooter extends Subsystem {
     
     public boolean inRange() {
         // Checking if we are within shooting range
-        return (IRSensor.getValue() >= MIN_IR_VALUE && IRSensor.getValue() <= MAX_IR_VALUE);
+        //System.out.println(IRSensor.getVoltage());
+        return (IRSensor.getVoltage()>= MIN_IR_VALUE && IRSensor.getVoltage() <= MAX_IR_VALUE);
+    }
+    
+    public boolean autoInRange() {
+        return (IRSensor.getVoltage() >= MIN_IR_VALUE && IRSensor.getVoltage() <= MAX_IR_VALUE + IR_TOLERANCE);
     }
     
     public void calibrate() {
