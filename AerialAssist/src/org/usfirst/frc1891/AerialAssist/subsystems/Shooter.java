@@ -84,7 +84,7 @@ public class Shooter extends Subsystem {
             ANGLE_MOTOR_SPEED = 0.8,
             
             // Shoot motor
-            SHOOT_MOTOR_SPEED = 0.2,
+            SHOOT_MOTOR_SPEED = 0.4,
             
             // Delays
             POST_SHOOT_DELAY = 1200, //1200
