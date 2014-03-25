@@ -23,15 +23,21 @@ import org.usfirst.frc1891.AerialAssist.RobotMap;
 public class  AutonomousCommand extends Command {
     
     /*
-    Autonomous:
-    1: Robot will be lined up parallel to the goals and
-    have the left goal's reflective tape inside the camera's
-    field of view
-    2: Record if we can see the tape, and start loading at the same time
-    3: Once we know what goal is hot, drive a certain distance forward
-    4: Then turn towards the side that didn't have its tape lit (Since
-    that side will now be a hot goal by the time we fire)
-    5: Fire.. then reload
+    Autonomous process:
+        1: Position the Robot...
+            a: Robot is as close to the goals as possible, and
+                parrallel to the top field goals.
+            b: Robot is as close to the middle of the field as possible
+                while still having the LEFT high goals reflective tape visible
+                to the robots camera.
+
+        (Autonomous has now started)
+
+        2: Start looking for tape and loading.
+        3: Once we know what goal is hot, drive a certain distance forward.
+        4: Then turn towards the side that didn't have its tape lit (Since
+        that side will now be a hot goal by the time we fire).
+        5: Fire.. then reload.
     */
     
     private Robot robot;
@@ -147,30 +153,8 @@ public class  AutonomousCommand extends Command {
                     resetStartPos();
                 }
             }
-            // Robot is straightening up
-            /*else if(!straight) {
-                //System.out.println("\tStraightening up : dif = " + (Math.abs(roundedCurrentPos - startPosition)));
-                
-                // If we are not straight
-                if(Math.abs(roundedCurrentPos - startPosition) < TURN_DISTANCE) {
-                    System.out.println("\t\tTurning : ");
-                    straight = false;
-                    // Turning the robot clockwise (right)
-                    Robot.driveTrain.driveUsingSpeed(TURN_SPEED, TURN_SPEED);
-                }
-                // Otherwise the robot is now straight, begin the next step
-                else {
-                    Robot.driveTrain.stop();
-                    straight = true;
-                    //System.out.println("\tStart pos: " + startPosition);
-                    //System.out.println("\tReal pos: " + RobotMap.driveJags2.getMasterJag().getPosition());
-                    System.out.println("\tDONE Straightening up");
-                    
-                    resetStartPos();
-                }
-            }
             // Robot is moving forward a certain distance
-            */else if(!inPosition) {
+            else if(!inPosition) {
                 System.out.println("Step 3");
                 
                 /*// If not in position
@@ -245,23 +229,15 @@ public class  AutonomousCommand extends Command {
                 System.out.println("Ready to turn around, load, and tilt...");
                 
                 // (Shooter will automatically load) so just do tilting and turning
+                // Tilting and turning code here...
                 
-                
-                // DO THIS WHEN FINISHED WITH AUTO
+                // Autonomous is finished (with the exception of loading)
                 isDone = true;
-                
             }
-            
-            
-            
-            
-            
-            
-            
-            
-            
         }
-        catch(Exception e) {
+        catch(CANTimeoutException e) {
+            e.printStackTrace();
+        } catch (TableKeyNotDefinedException e) {
             e.printStackTrace();
         }
     }

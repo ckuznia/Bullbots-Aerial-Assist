@@ -71,7 +71,8 @@ public class Shooter extends Subsystem {
             isLoading = false,
             isDown, // The robots tilt position will be checked and assigned on startup
             isTiltingShooter = false, 
-            hasFired = false;
+            hasFired = false,
+            showState = true;
     private final double 
             // Potentiometer
             UP_POT_VALUE = 2.46, // Always the smaller value
@@ -93,7 +94,6 @@ public class Shooter extends Subsystem {
             MIN_IR_VALUE = 1.95, // 2.0 is the actual spot
             MAX_IR_VALUE = 2.1,
             IR_TOLERANCE = 0.1;
-    private long startTime;
         
     public Shooter(Robot robot) {
         this.robot = robot;
@@ -150,51 +150,37 @@ public class Shooter extends Subsystem {
     }
     
     private void updateShooting() {
-        System.out.println("Shooter State: Shooting");
+        if(showState) System.out.println("Shooter State: Shooting");
         
         // Checking to see if we are finished firing and locking the winch
         if(fireAndLock()) {
             //System.out.println("\tJust started waiting...");
             try {
+                // NOTE: Robot is completely disabled at this point,
+                // since it only runs on one thread.
                 Thread.sleep((int) POST_SHOOT_DELAY);
             }
             catch(InterruptedException e) {
                 e.printStackTrace();
             }
             isShooting = false;
-            //System.out.println("\tJust ENDED waiting...");
-            
-            
-            
-            // Starting the timer
-            //startTime = System.currentTimeMillis();
         }
-        /*// Delay before moving onto the next state
-        else {
-            if(System.currentTimeMillis() >= startTime + POST_SHOOT_DELAY) isShooting = false;
-        }*/
     }
     
     private void updateLoading() {
-        System.out.println("Shooter State: Loading");
+        if(showState) System.out.println("Shooter State: Loading");
         load();
     }
     
     private void updateIdleTeleop() {
-        System.out.println("Shooter State: Ready to Load - Teleop");
-        
-        // Resetting encoders
-        resetEncoderPos();
+        if(showState) System.out.println("Shooter State: Ready to Load - Teleop");
         
         // Loading robot instantly
         load();
     }
     
     private void updateIdleAutonomous() {
-        System.out.println("Shooter State: Ready to Load - Autonomous");
-        
-        // Resetting encoders
-        resetEncoderPos();
+        if(showState) System.out.println("Shooter State: Ready to Load - Autonomous");
         
         // Loading the robot instantly
         load();
@@ -240,36 +226,21 @@ public class Shooter extends Subsystem {
         shootMotor.set(SHOOT_MOTOR_SPEED);
         
         // Waiting until the lock is released (fired)
-        if(!hasFired) {
-            hasFired = !shootSwitch.get();
-            //System.out.println("\t\tNot Fired");
-        }
+        if(!hasFired) hasFired = !shootSwitch.get();
         
         // Now waiting until the motor is back on the
         // switch, then stopping the motor (locked)
-        else {
-            //System.out.println("\t\tFIRED! (Winch unlocked)");
-            if(shootSwitch.get()) {
-                //System.out.println("\t\tLocked Winch.. done with fireAndLock()");
-                shootMotor.set(0.0);
-                hasFired = false;
-                return true;
-            }
-        }
-        //System.out.println("\t\tHasFired = " + hasFired);
-        
+        else if(shootSwitch.get()) {
+            shootMotor.set(0.0);
+            hasFired = false;
+            
+            // Returning true now that the fire and locking
+            // process is finished
+            return true;
+        }        
         // Returning false until the robot has fired
         // and the winch has been relocked
         return false;
-    }
-    
-    private void resetEncoderPos() {
-        try {
-            // Resetting the 0 point on the robot (Re-calibrating)
-            RobotMap.winchJags.getMasterJag().enableControl(0.0);
-        } catch (CANTimeoutException ex) {
-            ex.printStackTrace();
-        }
     }
     
     public void load() {

@@ -141,13 +141,10 @@ public class Robot extends IterativeRobot {
     public void testPeriodic() {
         LiveWindow.run();
         
-        // Showing information about the CANJaguars
+        // Showing information about the winch CANJaguars
         RobotMap.winchJags.showPosition();
         RobotMap.winchJags.showVoltage();
         RobotMap.winchJags.showCurrent();
-        
-        // Continually driving the motors to the setpoint configured in the LiveWindow
-        //driveTrain.driveUsingSpeed(RobotMap.driveJags1.setPoint, RobotMap.driveJags2.setPoint);
     }
     
     public void testInit() {
