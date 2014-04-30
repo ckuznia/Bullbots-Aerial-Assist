@@ -48,7 +48,8 @@ public class Robot extends IterativeRobot {
             SHOOT_BUTTON = 1, // Shooting requires both joysticks
             TILT_BUTTON = 3,
             DRIVE_NORMAL_BUTTON = 4,
-            DRIVE_INVERTED_BUTTON = 5;
+            DRIVE_INVERTED_BUTTON = 5,
+            LOAD_BUTTON = 10;
         
     /**
      * This function is run when the robot is first started up and should be

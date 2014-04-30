@@ -26,6 +26,18 @@ public class Winch extends DualJaguar {
     
     public void calibrate() {
         try {
+            // If the robot has not started loading
+            if(!Robot.shooter.isLoading())
+            {
+                // If the load button is NOT pressed
+                if(!Robot.oi.joystickController1.isButtonDown(Robot.LOAD_BUTTON) &&
+                    !Robot.oi.joystickController1.isButtonDown(Robot.LOAD_BUTTON)) {
+                    // Button has not been hit
+                    return;
+                }
+                // Otherwise the load button was pressed, continue loading
+            }
+            
             // Setting state values
             Robot.shooter.setLoaded(false);
             Robot.shooter.setLoading(true);

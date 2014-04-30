@@ -281,4 +281,8 @@ public class Shooter extends Subsystem {
     public void setLoading(boolean value) {
         isLoading = value;
     }
+    
+    public boolean isLoading() {
+        return isLoading;
+    }
 }
