@@ -31,7 +31,7 @@ public class Winch extends DualJaguar {
             {
                 // If the load button is NOT pressed
                 if(!Robot.oi.joystickController1.isButtonDown(Robot.LOAD_BUTTON) &&
-                    !Robot.oi.joystickController1.isButtonDown(Robot.LOAD_BUTTON)) {
+                    !Robot.oi.joystickController2.isButtonDown(Robot.LOAD_BUTTON)) {
                     // Button has not been hit
                     return;
                 }
